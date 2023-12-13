@@ -2,9 +2,7 @@ import pybullet as p
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats as stats
-from utils import get_collision_fn_PR2, load_env, execute_trajectory, draw_sphere_marker
-from pybullet_tools.utils import connect, disconnect, get_joint_positions, wait_if_gui, set_joint_positions, joint_from_name, get_link_pose, link_from_name
-from pybullet_tools.pr2_utils import PR2_GROUPS
+from models import motion_model, sensor_model
 
 # Define the noise covariances
 Q = np.diag([0.01, 0.01, 0.01]) # process noise covariance
@@ -14,24 +12,6 @@ R = np.diag([0.1, 0.1, 0.1]) # measurement noise covariance
 x0 = np.array([0, 0, 0]) # initial state
 u = np.array([0.5, 0.1]) # constant control
 dt = 0.1 # time step
-
-# Define the motion model
-def motion_model(x, u, dt):
-    # x: state vector [x, y, theta]
-    # u: control vector [v, omega]
-    # dt: time step
-    # returns: next state vector
-    x_next = x + np.array([u[0] * np.cos(x[2]) * dt, u[0] * np.sin(x[2]) * dt, u[1] * dt])
-    return x_next
-
-# Define the sensor model
-def sensor_model(x, sigma):
-    # x: state vector [x, y, theta]
-    # sigma: standard deviation of the sensor noise
-    # returns: noisy measurement of the state vector
-    z = x + np.random.normal(0, sigma, 3)
-    return z
-
 
 def kalman_filter(x0, P0, u, z, dt):
     # x0: initial state estimate

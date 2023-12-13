@@ -2,35 +2,31 @@ import pybullet as p
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats as stats
-from utils import get_collision_fn_PR2, load_env, execute_trajectory, draw_sphere_marker
-from pybullet_tools.utils import connect, disconnect, get_joint_positions, wait_if_gui, set_joint_positions, joint_from_name, get_link_pose, link_from_name
-from pybullet_tools.pr2_utils import PR2_GROUPS
+from models import motion_model, sensor_model
 
 
 # numParticles = 100
+# dt = 0.1
+
+# class particle():
+#     def __init__(self):
+#         self.x = 0
+#         self.y = 0
+#         self.theta = 0
+#         self.weight = 0
 
 # class PF():
 #     def __init__(self, initial_pose, numParticles):
-#         pass
-#     def action_model(self, odom_pose):
-#         pass
+#         self.numParticles = numParticles
+#         self.particles = []
 
-def motion_model(x, u, dt):
-    # x: state vector [x, y, theta]
-    # u: control vector [v, omega]
-    # dt: time step
-    # returns: next state vector
-    x_next = x + np.array([u[0] * np.cos(x[2]) * dt, u[0] * np.sin(x[2]) * dt, u[1] * dt])
-    return x_next
-
-# Define the sensor model
-def sensor_model(x, sigma):
-    # x: state vector [x, y, theta]
-    # sigma: standard deviation of the sensor noise
-    # returns: noisy measurement of the state vector
-    z = x + np.random.normal(0, sigma, 3)
-    return z
-
+#         for i in range(self.numParticles):
+#             p = particle()
+#             p.x = initial_pose[0]
+#             p.y = initial_pose[1]
+#             p.theta = initial_pose[2]
+#             p.weight = 1.0 / self.numParticles
+#             self.particles.append(p)
 
 def particle_filter(X0, W0, u, z, dt, Np):
     # X0: initial particle set (Np x 3 matrix)
