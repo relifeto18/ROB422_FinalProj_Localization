@@ -18,6 +18,8 @@ class ParticleFilter:
         self.sample_times = param["Sample_time"]
         self.particles = []
         self.sample_cov = param["Sample_cov"]
+        self.R = param["R"]
+        self.Q = param["Q"]
         self.dt = param["dt"]
         for _ in range(self.sample_times):
             p = particle()
@@ -28,8 +30,8 @@ class ParticleFilter:
         S = []
         for m in range(self.sample_times):
             next_particle = particle()
-            next_sample = motion_model(self.particles[m], u[m], self.dt)
-            next_weight = sensor_model(next_sample, z[m])
+            next_sample = motion_model(self.particles[m], u[m], self.dt, self.R)
+            next_weight = sensor_model(z[m], self.Q)
 
             next_particle.x = next_sample[0]
             next_particle.y = next_sample[1]
