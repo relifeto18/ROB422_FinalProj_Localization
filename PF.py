@@ -4,31 +4,7 @@ import matplotlib.pyplot as plt
 import scipy.stats as stats
 from models import motion_model, sensor_model
 
-
-# numParticles = 100
-# dt = 0.1
-
-# class particle():
-#     def __init__(self):
-#         self.x = 0
-#         self.y = 0
-#         self.theta = 0
-#         self.weight = 0
-
-# class PF():
-#     def __init__(self, initial_pose, numParticles):
-#         self.numParticles = numParticles
-#         self.particles = []
-
-#         for i in range(self.numParticles):
-#             p = particle()
-#             p.x = initial_pose[0]
-#             p.y = initial_pose[1]
-#             p.theta = initial_pose[2]
-#             p.weight = 1.0 / self.numParticles
-#             self.particles.append(p)
-
-def particle_filter(X0, W0, u, z, dt, Np):
+def ParticleFilter(X0, W0, u, z, dt, Np):
     # X0: initial particle set (Np x 3 matrix)
     # W0: initial weight vector (Np x 1 vector)
     # u: control vector

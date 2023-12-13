@@ -2,7 +2,6 @@ import numpy as np
 
 ## HW5 code
 def KalmanFilter(mu, Sigma, z, u, A, B, C, Q, R):
-    ###YOUR CODE HERE###
 
     #prediction step    
     mu_bar = A @ mu + B @ u
