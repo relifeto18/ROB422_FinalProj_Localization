@@ -1,7 +1,9 @@
+import sys
 import numpy as np
 from utils import draw_line
 
-np.set_printoptions(2, suppress=True)
+np.set_printoptions(3, suppress=True)
+np.set_printoptions(threshold=sys.maxsize)
 
 section1_start = [0.0, 5.5, -1.57]
 section1_end = [0.0, -0.5, -1.57]
@@ -117,4 +119,34 @@ def get_path():
     
     return robot_path
 
-# save_path()
+def get_motion():
+    motion = []
+
+    for i in range(path.shape[0] - 1):
+        diff = path[i+1] - path[i]
+        if diff[-1] == 0 and diff[0] == 0:     
+            num = int(diff[1] / 0.1)  
+            if num > 0:
+                new_motion = np.full((abs(num), 2), [0.1, path[i+1][-1]])
+                motion.append(new_motion)
+            if num < 0:
+                new_motion = np.full((abs(num), 2), [-0.1, path[i+1][-1]])
+                motion.append(new_motion)
+        elif diff[-1] == 0 and diff[1] == 0:    
+            num = int(diff[0] / 0.1)  
+            if num > 0:
+                new_motion = np.full((abs(num), 2), [0.1, path[i+1][-1]])
+                motion.append(new_motion)
+            if num < 0:
+                new_motion = np.full((abs(num), 2), [-0.1, path[i+1][-1]])
+                motion.append(new_motion)
+        elif diff[-1] != 0 and diff[0] == 0 and diff[1] == 0:   
+            num = 10
+            new_motion = np.full((num, 2), [0, path[i+1][-1] / 10])
+            motion.append(new_motion)
+    
+    with open("Motion.txt", "w") as f:
+        for t in motion:
+            f.write(f"{t}\n")
+    
+get_motion()
