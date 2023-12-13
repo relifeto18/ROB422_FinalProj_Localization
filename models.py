@@ -1,10 +1,8 @@
 import numpy as np
 
-sensor_noise = np.diag([0.3, 0.3, 0.1])
-action_noise = np.diag([0.3, 0.3, 0.1])
 
 # Define the motion model
-def motion_model(x, u, dt, noise=action_noise):
+def motion_model(x, u, dt, noise):
     # x: state vector [x, y, theta]
     # u: control vector [v, omega]
     # dt: time step
@@ -16,7 +14,7 @@ def motion_model(x, u, dt, noise=action_noise):
     return x_next
 
 # Define the sensor model
-def sensor_model(x, sigma=sensor_noise):
+def sensor_model(x, noise):
     # x: state vector [x, y, theta]
     # sigma: standard deviation of the sensor noise
     # returns: noisy measurement of the state vector

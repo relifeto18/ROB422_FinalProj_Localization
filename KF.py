@@ -5,8 +5,8 @@ class KalmanFilter:
         self.A = param['A']
         self.B = param['B']
         self.C = param['C']
-        self.Q = param['Q']
-        self.R = param['R']
+        self.Q = param['Q']   # motion noise
+        self.R = param['R']   # sensor noise
         self.Sigma = np.diag(np.zeros(self.A.shape[0]))
         
     ## HW5 code

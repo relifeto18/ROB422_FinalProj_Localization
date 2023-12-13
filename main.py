@@ -7,8 +7,8 @@ from pybullet_tools.utils import connect, disconnect, get_joint_positions, wait_
 from pybullet_tools.pr2_utils import PR2_GROUPS
 import path_data
 import time
-from KF import kalman_filter
-from PF import particle_filter
+from KF import KalmanFilter
+from PF import ParticleFilter
 from models import sensor_model, motion_model
 
 def main(screenshot=False):
@@ -32,19 +32,24 @@ def main(screenshot=False):
     path = path_data.get_path()
     path_data.draw_path()
     
+    dt = 0.1
     control_input = np.diff(path, axis=0)   # u
-    u = control_input[0]   # u0
-    x = tuple(get_joint_positions(robots['pr2'], base_joints))   # x0
     
-    x_upd, P_upd = kalman_filter()
-    X_upd, W_upd = particle_filter()
+    KF = KalmanFilter()
+    Q = KF.Q   # motion noise
+    R = KF.R   # sensor noise
     
-    for pth in path:
-        current_state = tuple(get_joint_positions(robots['pr2'], base_joints))   # x
-        sensor_model(current_state)
-        set_joint_positions(robots['pr2'], base_joints, pth)
+    # Kalman Filter    
+    for i in range(control_input.shape[0]):
+        mu = tuple(get_joint_positions(robots['pr2'], base_joints))   # x
+        z = sensor_model(mu, R)
+        u = control_input[i]
+        mu_new, Sigma_new = KF.KalmanFilter(mu, z, u)
+        x_new = motion_model(mu_new, u, dt, Q)     
         
-    # Execute planned path
+        # Execute planned path
+        set_joint_positions(robots['pr2'], base_joints, x_new)
+        
     # execute_trajectory(robots['pr2'], base_joints, path, sleep=0.2)
     # Keep graphics window opened
     wait_if_gui()
