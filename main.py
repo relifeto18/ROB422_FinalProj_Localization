@@ -11,6 +11,17 @@ from KF import KalmanFilter
 from PF import ParticleFilter
 from models import sensor_model, motion_model
 
+param = {
+    'dt': 0.1,
+    'A': np.eye(3),
+    'B': np.eye(3),
+    'C': np.eye(3),
+    'Q': np.diag([1, 1, 0.05]),
+    'R': np.diag([0.1,0.1,0.01]),
+    'Sample_time': 100,
+    'Sample_cov': np.diag([0.1, 0.1, 0.1])  # covariance of sampling
+}
+
 def main(screenshot=False):
     # initialize PyBullet
     connect(use_gui=True)
@@ -34,8 +45,8 @@ def main(screenshot=False):
     
     dt = 0.1
     control_input = np.diff(path, axis=0)   # u
-    
-    KF = KalmanFilter()
+    print(control_input)
+    KF = KalmanFilter(param)
     Q = KF.Q   # motion noise
     R = KF.R   # sensor noise
     
@@ -44,9 +55,12 @@ def main(screenshot=False):
         mu = tuple(get_joint_positions(robots['pr2'], base_joints))   # x
         z = sensor_model(mu, R)
         u = control_input[i]
-        mu_new, Sigma_new = KF.KalmanFilter(mu, z, u)
-        x_new = motion_model(mu_new, u, dt, Q)     
+        mu_new, _ = KF.KalmanFilter(mu, z, u)
+        x_new = mu_new#motion_model(mu_new, u, dt, Q)     
+        draw_sphere_marker((x_new[0], x_new[1], 0), 0.1, (1, 0, 0, 1))
         
+        # hardcode
+        # x_new = np.random.multivariate_normal(mu_new, Q, 1)[0]
         # Execute planned path
         set_joint_positions(robots['pr2'], base_joints, x_new)
         
