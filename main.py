@@ -5,6 +5,7 @@ from utils import get_collision_fn_PR2, load_env, execute_trajectory, draw_spher
 from pybullet_tools.utils import connect, disconnect, get_joint_positions, wait_if_gui, set_joint_positions, joint_from_name, get_link_pose, link_from_name
 from pybullet_tools.pr2_utils import PR2_GROUPS
 import path_data
+import KF, PF
 
 def main(screenshot=False):
     # initialize PyBullet
@@ -22,10 +23,11 @@ def main(screenshot=False):
     
     # define active DoFs
     base_joints = [joint_from_name(robots['pr2'], name) for name in PR2_GROUPS['base']]
-    collision_fn = get_collision_fn_PR2(robots['pr2'], base_joints, list(obstacles.values()))
 
     path = path_data.get_path()
     path_data.draw_path()
+    
+    
     
     # Execute planned path
     execute_trajectory(robots['pr2'], base_joints, path, sleep=0.2)
