@@ -11,6 +11,17 @@ from KF import KalmanFilter
 from PF import ParticleFilter
 from models import sensor_model, motion_model
 
+param = {
+    'dt': 0.1,
+    'A': np.eye(3),
+    'B': np.eye(3),
+    'C': np.eye(3),
+    'Q': np.diag([1, 1, 0.05]),
+    'R': np.diag([0.1,0.1,0.01]),
+    'Sample_time': 100,
+    'Sample_cov': np.diag([0.1, 0.1, 0.1])  # covariance of sampling
+}
+
 def main(screenshot=False):
     # initialize PyBullet
     connect(use_gui=True)
@@ -35,7 +46,7 @@ def main(screenshot=False):
     dt = 0.1
     control_input = np.diff(path, axis=0)   # u
     
-    KF = KalmanFilter()
+    KF = KalmanFilter(param)
     Q = KF.Q   # motion noise
     R = KF.R   # sensor noise
     
