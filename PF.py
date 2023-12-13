@@ -2,7 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats as stats
 from models import motion_model, sensor_model
-from noise import gaussian_noise
 import random
 import copy
 
@@ -23,7 +22,7 @@ class ParticleFilter:
         self.dt = param["dt"]
         for _ in range(self.sample_times):
             p = particle()
-            p.x, p.y, p.theta = gaussian_noise((0, 0, 0), self.sample_cov)
+            p.x, p.y, p.theta = np.random.multivariate_normal((0, 0, 0), self.sample_cov, 1)[0]
             p.weight = 1.0 / self.sample_times
 
     def PF(self, u: list, z: list):
