@@ -41,52 +41,71 @@ def save_path():
     Traj.append(path[0].tolist())
     
     for i in range(path.shape[0]-1):
+        # rotate
         if (path[i][0] == path[i+1][0]) and (path[i][1] == path[i+1][1]):
-            Traj.append(path[i+1].tolist())
+            num = 10
+            diff = path[i+1][-1] - path[i][-1]
+            for j in range(num):
+                new_traj = path[i].copy()
+                new_traj[-1] += (j+1) * diff * 0.1
+                Traj.append(new_traj)
+        # move y
         elif (path[i][0] == path[i+1][0]) and (path[i][1] != path[i+1][1]):
             num = int((path[i+1][1] - path[i][1]) / 0.1)
-            for i in range(abs(num)):
+            for j in range(abs(num)):
                 if num > 0:
-                    new_traj = [round(a + b, 2) for a, b in zip(Traj[-1], [0, 0.1, 0])]
+                    new_traj = [round(a + b, 3) for a, b in zip(Traj[-1], [0, 0.1, 0])]
                 else:
-                    new_traj = [round(a + b, 2) for a, b in zip(Traj[-1], [0, -0.1, 0])]
+                    new_traj = [round(a + b, 3) for a, b in zip(Traj[-1], [0, -0.1, 0])]
                 Traj.append(new_traj)
+        # move x
         elif (path[i][0] != path[i+1][0]) and (path[i][1] == path[i+1][1]):
             num = int((path[i+1][0] - path[i][0]) / 0.1)
-            for i in range(abs(num)):
+            for j in range(abs(num)):
                 if num > 0:
-                    new_traj = [round(a + b, 2) for a, b in zip(Traj[-1], [0.1, 0, 0])]
+                    new_traj = [round(a + b, 3) for a, b in zip(Traj[-1], [0.1, 0, 0])]
                 else:
-                    new_traj = [round(a + b, 2) for a, b in zip(Traj[-1], [-0.1, 0, 0])]
+                    new_traj = [round(a + b, 3) for a, b in zip(Traj[-1], [-0.1, 0, 0])]
                 Traj.append(new_traj)
+        # move diag
         else:
-            x_num = int((path[i+1][0] - path[i][0]) / 0.1)
-            y_num = int((path[i+1][1] - path[i][1]) / 0.1)
+            diff = path[i+1] - path[i]
+            dis = np.sqrt(diff[0]**2 + diff[1]**2)
+            num = int(dis / 0.1) 
             
-            if x_num < y_num:
-                mul = abs(y_num / x_num)
-                for i in range(abs(x_num)):
-                    if (x_num > 0 and y_num > 0):
-                        new_traj = [round(a + b, 2) for a, b in zip(Traj[-1], [0.1, mul*0.1, 0])]
-                    elif (x_num > 0 and y_num < 0):
-                        new_traj = [round(a + b, 2) for a, b in zip(Traj[-1], [0.1, -mul*0.1, 0])]
-                    elif (x_num < 0 and y_num < 0):
-                        new_traj = [round(a + b, 2) for a, b in zip(Traj[-1], [-0.1, -mul*0.1, 0])]
-                    else:
-                        new_traj = [round(a + b, 2) for a, b in zip(Traj[-1], [-0.1, mul*0.1, 0])]
-                    Traj.append(new_traj)
-            else:
-                mul = abs(x_num / y_num)
-                for i in range(abs(y_num)):
-                    if (x_num > 0 and y_num > 0):
-                        new_traj = [round(a + b, 2) for a, b in zip(Traj[-1], [mul*0.1, 0.1, 0])]
-                    elif (x_num > 0 and y_num < 0):
-                        new_traj = [round(a + b, 2) for a, b in zip(Traj[-1], [mul*0.1, -0.1, 0])]
-                    elif (x_num < 0 and y_num < 0):
-                        new_traj = [round(a + b, 2) for a, b in zip(Traj[-1], [-mul*0.1, -0.1, 0])]
-                    else:
-                        new_traj = [round(a + b, 2) for a, b in zip(Traj[-1], [-mul*0.1, 0.1, 0])]
-                    Traj.append(new_traj)
+            mul_x = diff[0] / num
+            mul_y = diff[1] / num
+            
+            for j in range(num):
+                new_traj = path[i].copy()
+                new_traj[0] += (j+1) * mul_x
+                new_traj[1] += (j+1) * mul_y
+                Traj.append(new_traj)
+                
+            # if x_num < y_num:
+            #     mul = abs(y_num / x_num)
+            #     for j in range(abs(x_num)):
+            #         if (x_num > 0 and y_num > 0):
+            #             new_traj = [round(a + b, 3) for a, b in zip(Traj[-1], [0.1, mul*0.1, 0])]
+            #         elif (x_num > 0 and y_num < 0):
+            #             new_traj = [round(a + b, 3) for a, b in zip(Traj[-1], [0.1, -mul*0.1, 0])]
+            #         elif (x_num < 0 and y_num < 0):
+            #             new_traj = [round(a + b, 3) for a, b in zip(Traj[-1], [-0.1, -mul*0.1, 0])]
+            #         else:
+            #             new_traj = [round(a + b, 3) for a, b in zip(Traj[-1], [-0.1, mul*0.1, 0])]
+            #         Traj.append(new_traj)
+            # else:
+            #     mul = abs(x_num / y_num)
+            #     for j in range(abs(y_num)):
+            #         if (x_num > 0 and y_num > 0):
+            #             new_traj = [round(a + b, 3) for a, b in zip(Traj[-1], [mul*0.1, 0.1, 0])]
+            #         elif (x_num > 0 and y_num < 0):
+            #             new_traj = [round(a + b, 3) for a, b in zip(Traj[-1], [mul*0.1, -0.1, 0])]
+            #         elif (x_num < 0 and y_num < 0):
+            #             new_traj = [round(a + b, 3) for a, b in zip(Traj[-1], [-mul*0.1, -0.1, 0])]
+            #         else:
+            #             new_traj = [round(a + b, 3) for a, b in zip(Traj[-1], [-mul*0.1, 0.1, 0])]
+            #         Traj.append(new_traj)
                 
     with open("Traj.txt", "w") as f:
         for t in Traj:
@@ -176,8 +195,8 @@ def save_motion():
             new_motion = np.full((num, 2), [0, diff[-1]])
             motion.append(new_motion)
             new_theta = np.full((abs(num), 1), [path[i][-1]])
-            for i in range(num):
-                new_theta[i] += (i+1) * diff[-1] * 0.1
+            for j in range(num):
+                new_theta[j] += (j+1) * diff[-1] * 0.1
             theta.append(new_theta)
         
     
@@ -219,4 +238,4 @@ def get_motion():
     
     return robot_motion, robot_theta
     
-# get_motion()
+# save_path()

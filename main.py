@@ -16,8 +16,8 @@ param = {
     'A': np.eye(3),
     'B': np.eye(3) * 0.1,
     'C': np.eye(3),
-    'Q': np.diag([0.001, 0.001, 0.001]) * 0.000000000000000000001,
-    'R': np.diag([0.001, 0.001, 0.001]) * 0.0000000000000000000000001,
+    'Q': np.diag([0.05, 0.05, 0.05]),
+    'R': np.diag([0.01, 0.01, 0.01]),
     'Sample_time': 100,
     'Sample_cov': np.diag([0.1, 0.1, 0.1])  # covariance of sampling
 }
@@ -54,18 +54,19 @@ def main(screenshot=False):
     for i, motion in enumerate(motion_input):
         mu = tuple(get_joint_positions(robots['pr2'], base_joints))
         u = np.array([motion[0]*np.cos(theta[i]), motion[0]*np.sin(theta[i]), motion[-1]], dtype=float)
-        z = sensor_model(mu, R)
-        mu_new = KF.KalmanFilter(mu, z, u)
+        z = sensor_model(path[i+1], R)
+        mu_new = KF.KalmanFilter(mu, z, u) 
+        with open("output.txt", "a") as f:
+            for t in mu_new:
+                f.write(f"{t}\n")
         draw_sphere_marker((mu_new[0], mu_new[1], 0.1), 0.1, (1, 1, 0, 1))
-        # x_new = motion_model(mu_new, u, dt, Q)
-        # draw_sphere_marker((x_new[0], x_new[1], 0.1), 0.1, (1, 1, 0, 1))
-        
-        # hardcode
-        # x_new = np.random.multivariate_normal(mu_new, Q, 1)[0]
-        # Execute planned path
         set_joint_positions(robots['pr2'], base_joints, mu_new)
+    
+    # Test Path
+    # for pa in path:
+    #     draw_sphere_marker((pa[0], pa[1], 0.1), 0.1, (1, 1, 0, 1))
+    #     set_joint_positions(robots['pr2'], base_joints, pa)
         
-    # execute_trajectory(robots['pr2'], base_joints, path, sleep=0.2)
     # Keep graphics window opened
     wait_if_gui()
     disconnect()
