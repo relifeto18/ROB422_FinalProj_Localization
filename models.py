@@ -7,9 +7,9 @@ def motion_model(x, u, dt, noise):
     # dt: time step
     # returns: next state vector
     x_next = np.zeros_like(x)
-    x_next[0] += x[0] + dt * u[0] * np.cos(x[2])
-    x_next[1] += x[1] + dt * u[0] * np.sin(x[2])
-    x_next[2] += x[2] + dt * u[1]
+    x_next[0] += x[0] + dt * u[0]
+    x_next[1] += x[1] + dt * u[1]
+    x_next[2] += x[2] + dt * u[2]
     x_next = np.random.multivariate_normal(x_next, noise, 1)[0]
     return x_next
 
