@@ -136,8 +136,8 @@ def main(screenshot=False):
 
             draw_sphere_marker((pose_estimated[0], pose_estimated[1], 0.1), 0.1, (0, 0, 1, 1))
             set_joint_positions(robots['pr2'], base_joints, pose_estimated)
- 
 
+ 
     # Test Path
     # for pa in path:
     #     draw_sphere_marker((pa[0], pa[1], 0.1), 0.1, (1, 1, 0, 1))
