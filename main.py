@@ -45,13 +45,14 @@ def main(screenshot=False):
     
     path = get_path()
     draw_path()
-    
+    filter = "PF"
     KF_error = []
     sensor_error = []
     sensor_data = []
     estimation = []
     draw_KF = False
     plot_cov = False
+    
     dt = 0.1
     KF = KalmanFilter(param)
     Q = KF.Q   # motion noise
@@ -59,83 +60,84 @@ def main(screenshot=False):
     motion_input, theta = get_motion()
     PF = ParticleFilter(param)
 
-    if plot_cov:
-        plt.ion()
-        plot_axes = plt.subplot(111, aspect='equal')  
-        plot_axes.set_xlim([-2.5, 10])  # Adjust these values as needed
-        plot_axes.set_ylim([-2.5, 10])
-
     ################ Kalman Filter ################
-    start_time = time.time()
-    for i, motion in enumerate(motion_input):
-        motion = motion_input[i]
-        mu = tuple(get_joint_positions(robots['pr2'], base_joints))
-
-        u = np.array([float(motion[0]*np.cos(theta[i])), float(motion[0]*np.sin(theta[i])), motion[-1]])
-        z = sensor_model(path[i+1].copy(), Q)
-        mu_new, Sigma_new = KF.KalmanFilter(mu, z, u) 
-        KF_error.append(path[i+1] - mu_new)
-        sensor_error.append(path[i+1] - z)
-        sensor_data.append(z)
-        estimation.append(mu_new)
-        
-        # plot cov
+    if filter == "KF":
         if plot_cov:
-            if i%5==0:
-                x = np.array(mu).reshape(-1,1)
-                lambda_, v = np.linalg.eig(Sigma_new)
-                lambda_ = np.sqrt(lambda_)
-                angle = np.rad2deg(np.arctan2(v[1, 0], v[0, 0]))  # Correct angle calculation
-                ell = Ellipse(xy=mu_new,
-                            width=lambda_[0] * 2, height=lambda_[1] * 2,
-                            angle=angle)
-                ell.set_facecolor((1.0, 1.0, 1.0, 0))
-                ell.set_edgecolor('k')
-                plot_axes.add_artist(ell)
-                plt.scatter(x[0,0],x[1,0],c='r',s=5)
-            plot_axes.set_xlim([min(plot_axes.get_xlim()[0], mu_new[0]-5), max(plot_axes.get_xlim()[1], mu_new[0]+5)])
-            plot_axes.set_ylim([min(plot_axes.get_ylim()[0], mu_new[1]-5), max(plot_axes.get_ylim()[1], mu_new[1]+5)])
-            plt.draw()
-            plt.pause(0.0001)
-            # plot_cov(np.array(mu).reshape(-1,1),Sigma_new, plot_axes)
+            plt.ion()
+            plot_axes = plt.subplot(111, aspect='equal')  
+            plot_axes.set_xlim([-2.5, 10])  # Adjust these values as needed
+            plot_axes.set_ylim([-2.5, 10])
+        start_time = time.time()
         
-        if draw_KF == True:
-            draw_sphere_marker((z[0], z[1], 0.15), 0.08, (0, 0, 1, 1))
-            draw_sphere_marker((mu_new[0], mu_new[1], 0.1), 0.08, (1, 1, 0, 1))
-            
-        set_joint_positions(robots['pr2'], base_joints, mu_new)
+        for i, motion in enumerate(motion_input):
+            motion = motion_input[i]
+            mu = tuple(get_joint_positions(robots['pr2'], base_joints))
 
-    print("Kalman Filter run time: ", time.time() - start_time)
+            u = np.array([motion[0]*np.cos(theta[i]), motion[0]*np.sin(theta[i]), motion[-1]], dtype=float)
+            z = sensor_model(path[i+1].copy(), Q)
+            mu_new, Sigma_new = KF.KalmanFilter(mu, z, u) 
+            KF_error.append(path[i+1] - mu_new)
+            sensor_error.append(path[i+1] - z)
+            sensor_data.append(z)
+            estimation.append(mu_new)
+            
+            # plot cov
+            if plot_cov:
+                if i%5==0:
+                    x = np.array(mu).reshape(-1,1)
+                    lambda_, v = np.linalg.eig(Sigma_new)
+                    lambda_ = np.sqrt(lambda_)
+                    angle = np.rad2deg(np.arctan2(v[1, 0], v[0, 0]))  # Correct angle calculation
+                    ell = Ellipse(xy=mu_new,
+                                width=lambda_[0] * 2, height=lambda_[1] * 2,
+                                angle=angle)
+                    ell.set_facecolor((1.0, 1.0, 1.0, 0))
+                    ell.set_edgecolor('k')
+                    plot_axes.add_artist(ell)
+                    plt.scatter(x[0,0],x[1,0],c='r',s=5)
+                plot_axes.set_xlim([min(plot_axes.get_xlim()[0], mu_new[0]-5), max(plot_axes.get_xlim()[1], mu_new[0]+5)])
+                plot_axes.set_ylim([min(plot_axes.get_ylim()[0], mu_new[1]-5), max(plot_axes.get_ylim()[1], mu_new[1]+5)])
+                plt.draw()
+                plt.pause(0.0001)
+                # plot_cov(np.array(mu).reshape(-1,1),Sigma_new, plot_axes)
+            
+            if draw_KF == True:
+                draw_sphere_marker((z[0], z[1], 0.15), 0.08, (0, 0, 1, 1))
+                draw_sphere_marker((mu_new[0], mu_new[1], 0.1), 0.08, (1, 1, 0, 1))
+                
+            set_joint_positions(robots['pr2'], base_joints, mu_new)
+
+        print("Kalman Filter run time: ", time.time() - start_time)
+        
+        if plot_cov:
+            plt.ioff()
+            plt.show()
     
-    if plot_cov:
-        plt.ioff()
-        plt.show()
-    
-    # visualize
-    kf_err = np.linalg.norm(np.vstack(KF_error.copy()), axis=1)
-    sensor_err = np.linalg.norm(np.vstack(sensor_error.copy()), axis=1)
-    sensor_data = np.vstack(sensor_data)[:, :2]
-    estimation = np.vstack(estimation)[:, :2]
-    ground = path[:, :2].copy()
-    plot_kf = Plot_KF(len(KF_error), kf_err, sensor_err, sensor_data, estimation, ground)
-    plot_kf.show_plots()
+        # visualize
+        kf_err = np.linalg.norm(np.vstack(KF_error.copy()), axis=1)
+        sensor_err = np.linalg.norm(np.vstack(sensor_error.copy()), axis=1)
+        sensor_data = np.vstack(sensor_data)[:, :2]
+        estimation = np.vstack(estimation)[:, :2]
+        ground = path[:, :2].copy()
+        plot_kf = Plot_KF(len(KF_error), kf_err, sensor_err, sensor_data, estimation, ground)
+        plot_kf.show_plots()
     
     
     ################ Particle Filter ################
+    if filter == "PF":
+        for i, motion in enumerate(motion_input):
+            u = np.array([float(motion[0]*np.cos(theta[i])), float(motion[0]*np.sin(theta[i])), motion[-1]])
+            if i+1 == len(path):
+                wait_if_gui()
+                print("PF finished")
+                break
+            z = sensor_model(path[i+1], R)
+            pose_estimated = PF.ParticleFilter(u, z, i%50==0)
 
-    for i, motion in enumerate(motion_input):
-        u = np.array([float(motion[0]*np.cos(theta[i])), float(motion[0]*np.sin(theta[i])), motion[-1]])
-        if i+1 == len(path):
-            wait_if_gui()
-            print("PF finished")
-            break
-        z = sensor_model(path[i+1], R)
-        pose_estimated = PF.ParticleFilter(u, z, False)
+            draw_sphere_marker((pose_estimated[0], pose_estimated[1], 0.1), 0.1, (0, 0, 1, 1))
+            set_joint_positions(robots['pr2'], base_joints, pose_estimated)
 
-        draw_sphere_marker((pose_estimated[0], pose_estimated[1], 0.1), 0.1, (0, 0, 1, 1))
-        set_joint_positions(robots['pr2'], base_joints, pose_estimated)
  
-
     # Test Path
     # for pa in path:
     #     draw_sphere_marker((pa[0], pa[1], 0.1), 0.1, (1, 1, 0, 1))
