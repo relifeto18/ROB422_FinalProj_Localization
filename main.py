@@ -16,10 +16,8 @@ param = {
     'A': np.eye(3),
     'B': np.eye(3)*0.1,
     'C': np.eye(3),
-    # 'Q': np.diag([0.001, 0.001, 0.001]),
-    # 'R': np.diag([0.001, 0.001, 0.001]),
     'Q': np.diag([0.5, 0.5, 0.5]),
-    'R': np.diag([0.1, 0.1, 0.1]),
+    'R': np.diag([0.05, 0.05, 0.05]),
     'Sample_time': 300,
     'Sample_cov': np.diag([0.1, 0.1, 0.1])  # covariance of sampling
 }
@@ -79,7 +77,7 @@ def main(screenshot=False):
         z = sensor_model(path[i+1], R)
         pose_estimated = PF.ParticleFilter(u, z, i%66==0)
 
-        draw_sphere_marker((pose_estimated[0], pose_estimated[1], 0.1), 0.1, (1, 0, 0, 1))
+        draw_sphere_marker((pose_estimated[0], pose_estimated[1], 0.1), 0.1, (0, 0, 1, 1))
         set_joint_positions(robots['pr2'], base_joints, pose_estimated)
         
     # execute_trajectory(robots['pr2'], base_joints, path, sleep=0.2)
