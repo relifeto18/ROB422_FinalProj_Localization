@@ -15,10 +15,6 @@ section4_start = [10.0, 2.5, 2.676]
 section4_end = [7.0, 4.0, 2.676]
 section5_start = [7.0, 4.0, 0.46]
 section5_end = [10.0, 5.5, 0.46]
-# section4_start = [10.0, 2.5, 2.36]
-# section4_end = [7.0, 4.0, 2.36]
-# section5_start = [7.0, 4.0, 0.79]
-# section5_end = [10.0, 5.5, 0.79]
 section6_start = [10.0, 5.5, 1.57]
 section6_end = [10.0, 12.0, 1.57]
 section7_start = [10.0, 12.0, 0]
@@ -27,8 +23,6 @@ section8_start = [21.0, 12.0, -1.57]
 section8_end = [21.0, 8.0, -1.57]
 section9_start = [21.0, 8.0, -1.95]
 section9_end = [19.0, 3.0, -1.95]
-# section9_start = [21.0, 8.0, -2.36]
-# section9_end = [19.0, 3.0, -2.36]
 section10_start = [19.0, 3.0, -1.57]
 section10_end = [19.0, -0.5, -1.57]
 section11_start = [19.0, -0.5, 0]
@@ -127,6 +121,7 @@ def get_path():
 
 def save_motion():
     motion = []
+    theta = []
 
     for i in range(path.shape[0] - 1):
         diff = path[i+1] - path[i]
@@ -136,6 +131,8 @@ def save_motion():
             num = int(diff[1] / 0.1)  
             new_motion = np.full((abs(num), 2), [1, diff[-1]])
             motion.append(new_motion)
+            new_theta = np.full((abs(num), 1), [path[i][-1]])
+            theta.append(new_theta)
             # if num > 0:
             #     new_motion = np.full((abs(num), 2), [0.1, path[i][-1]])
             #     motion.append(new_motion)
@@ -148,6 +145,8 @@ def save_motion():
             num = int(diff[0] / 0.1)  
             new_motion = np.full((abs(num), 2), [1, diff[-1]])
             motion.append(new_motion) 
+            new_theta = np.full((abs(num), 1), [path[i][-1]])
+            theta.append(new_theta)
         #     num = int(diff[0] / 0.1)  
         #     if num > 0:
         #         new_motion = np.full((abs(num), 2), [0.1, path[i][-1]])
@@ -157,11 +156,13 @@ def save_motion():
         #         motion.append(new_motion)
         
         # move diag
-        elif diff[-1] == 0 and diff[0] != 0 and diff[1] != 0:    
+        elif diff[-1] == 0 and diff[0] != 0 and diff[1] != 0:  
             dis = np.sqrt(diff[0]**2 + diff[1]**2)
             num = int(dis / 0.1)  
             new_motion = np.full((abs(num), 2), [1, diff[-1]])
             motion.append(new_motion)
+            new_theta = np.full((abs(num), 1), [path[i][-1]])
+            theta.append(new_theta)
             # if num > 0:
             #     new_motion = np.full((abs(num), 2), [0.1, path[i][-1]])
             #     motion.append(new_motion)
@@ -174,27 +175,48 @@ def save_motion():
             num = 10
             new_motion = np.full((num, 2), [0, diff[-1]])
             motion.append(new_motion)
+            new_theta = np.full((abs(num), 1), [path[i][-1]])
+            for i in range(num):
+                new_theta[i] += (i+1) * diff[-1] * 0.1
+            theta.append(new_theta)
         
     
     motion_input = np.vstack(motion)
+    theta_input = np.vstack(theta)
+    
+    with open("theta.txt", "w") as f:
+        for t in theta_input:
+            f.write(f"{t}\n")
     
     with open("Motion.txt", "w") as f:
         for t in motion_input:
             f.write(f"{t}\n")
     
 def get_motion():
-    data = []
+    motion = []
 
     # Open the file and read line by line
     with open('Motion.txt', 'r') as file:
         for line in file:
             # Convert the line to a NumPy array
             array = np.fromstring(line.strip('[]\n'), sep=' ')
-            data.append(array)
+            motion.append(array)
 
     # Convert the list of arrays into a 2D array
-    robot_motion = np.vstack(data)
+    robot_motion = np.vstack(motion)
     
-    return robot_motion
+    theta = []
+
+    # Open the file and read line by line
+    with open('theta.txt', 'r') as file:
+        for line in file:
+            # Convert the line to a NumPy array
+            array = float(line.strip('[]\n'))
+            theta.append(array)
+
+    # Convert the list of arrays into a 2D array
+    robot_theta = np.vstack(theta)
     
-# save_motion()
+    return robot_motion, robot_theta
+    
+# get_motion()

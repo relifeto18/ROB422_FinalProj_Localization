@@ -16,8 +16,8 @@ param = {
     'A': np.eye(3),
     'B': np.eye(3),
     'C': np.eye(3),
-    'Q': 0.0001*np.diag([1, 1, 1]),
-    'R': np.diag([0, 0, 0]),
+    'Q': 0.00000001*np.diag([1., 1., 0.05]),
+    'R': 0.00000001*np.diag([0.1, 0.1, 0.01]),
     # 'Q': np.diag([1, 1, 0.05]),
     # 'R': np.diag([0.1,0.1,0.01]),
     'Sample_time': 100,
@@ -50,22 +50,23 @@ def main(screenshot=False):
     Q = KF.Q   # motion noise
     R = KF.R   # sensor noise
     
-    motion_input = get_motion()
+    motion_input, theta = get_motion()
     
     # # Kalman Filter    
-    for motion in motion_input:
+    for i, motion in enumerate(motion_input):
         mu = tuple(get_joint_positions(robots['pr2'], base_joints))
-        u = np.array([motion[0]*np.cos(mu[2]), motion[0]*np.sin(mu[2]), motion[-1]])
+        u = np.array([motion[0]*np.cos(theta[i]), motion[0]*np.sin(theta[i]), motion[-1]], dtype=float)
         z = sensor_model(mu, R)
         mu_new, _ = KF.KalmanFilter(mu, z, u)
+        print(u, mu_new)
         # draw_sphere_marker((mu_new[0], mu_new[1], 0.1), 0.1, (1, 1, 0, 1))
         x_new = motion_model(mu_new, u, dt, Q)
-        # draw_sphere_marker((x_new[0], x_new[1], 0.1), 0.1, (1, 1, 0, 1))
+        draw_sphere_marker((x_new[0], x_new[1], 0.1), 0.1, (1, 1, 0, 1))
         
         # hardcode
         # x_new = np.random.multivariate_normal(mu_new, Q, 1)[0]
         # Execute planned path
-        set_joint_positions(robots['pr2'], base_joints, x_new)
+        set_joint_positions(robots['pr2'], base_joints, mu_new)
         
     # execute_trajectory(robots['pr2'], base_joints, path, sleep=0.2)
     # Keep graphics window opened
