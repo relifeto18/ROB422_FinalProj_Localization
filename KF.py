@@ -5,8 +5,8 @@ class KalmanFilter:
         self.A = param['A']
         self.B = param['B']
         self.C = param['C']
-        self.Q = param['Q']   # motion noise
-        self.R = param['R']   # sensor noise
+        self.Q = param['Q']   # sensor noise
+        self.R = param['R']   # motion noise
         self.Sigma = np.eye(3)
         
     def KalmanFilter(self, mu: list, z: list, u: list):
@@ -22,4 +22,4 @@ class KalmanFilter:
         
         self.Sigma = Sigma_new
         
-        return mu_new
+        return mu_new, Sigma_new
