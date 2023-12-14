@@ -19,7 +19,7 @@ param = {
     # 'Q': np.diag([0.001, 0.001, 0.001]),
     # 'R': np.diag([0.001, 0.001, 0.001]),
     'Q': np.diag([0.5, 0.5, 0.5]),
-    'R': np.diag([0.1, 0.1, 0.1]),
+    'R': np.diag([0.01, 0.01, 0.01]),
     'Sample_time': 300,
     'Sample_cov': np.diag([0.1, 0.1, 0.1])  # covariance of sampling
 }
@@ -77,7 +77,7 @@ def main(screenshot=False):
             print("PF finished")
             break
         z = sensor_model(path[i+1], R)
-        pose_estimated = PF.ParticleFilter(u, z, i%66==0)
+        pose_estimated = PF.ParticleFilter(u, z, False)
 
         draw_sphere_marker((pose_estimated[0], pose_estimated[1], 0.1), 0.1, (1, 0, 0, 1))
         set_joint_positions(robots['pr2'], base_joints, pose_estimated)

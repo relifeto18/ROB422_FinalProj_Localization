@@ -56,6 +56,15 @@ class ParticleFilter:
         # self.X = X_upd
         # self.W = W_upd
         # return np.mean(X_upd, axis=0)
+
+        # sort
+        indices = list(range(len(self.W)))
+        combined = list(zip(self.W, indices))
+        sorted_combined = sorted(combined, key=lambda x: x[0])
+        sorted_value, sorted_indices = zip(*sorted_combined)
+        self.W = list(sorted_value)[::-1]
+        sorted_indices = list(sorted_indices)[::-1]
+        self.X = self.X[sorted_indices]
     
         # low var resample
         X_upd = np.zeros((Np, 3))
@@ -75,4 +84,18 @@ class ParticleFilter:
         self.W = W_upd / weight_sum # reset the weights
         self.X = X_upd
         # self.W = W_upd
-        return np.mean(X_upd, axis=0)
+
+        x_mean = 0
+        y_mean = 0
+        cos_theta_mean = 0
+        sin_theta_mean = 0
+
+        # calculate pose
+        for i in range(Np):
+            x_mean += self.W[i] * self.X[i][0]
+            y_mean += self.W[i] * self.X[i][1]
+            cos_theta_mean += self.W[i] * np.cos(self.X[i][2])
+            sin_theta_mean += self.W[i] * np.sin(self.X[i][2])
+
+        return [x_mean, y_mean, np.arctan2(sin_theta_mean, cos_theta_mean)]
+        # return np.mean(self.X, axis=0)
