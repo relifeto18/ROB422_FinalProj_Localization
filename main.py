@@ -14,12 +14,10 @@ from models import sensor_model, motion_model
 param = {
     'dt': 0.1,
     'A': np.eye(3),
-    'B': np.eye(3),
+    'B': np.eye(3) * 0.1,
     'C': np.eye(3),
-    'Q': np.diag([0.001, 0.001, 0.001]),
-    'R': np.diag([0.001, 0.001, 0.001]),
-    # 'Q': np.diag([1, 1, 0.05]),
-    # 'R': np.diag([0.1,0.1,0.01]),
+    'Q': np.diag([0.001, 0.001, 0.001]) * 0.000000000000000000001,
+    'R': np.diag([0.001, 0.001, 0.001]) * 0.0000000000000000000000001,
     'Sample_time': 100,
     'Sample_cov': np.diag([0.1, 0.1, 0.1])  # covariance of sampling
 }
@@ -57,9 +55,8 @@ def main(screenshot=False):
         mu = tuple(get_joint_positions(robots['pr2'], base_joints))
         u = np.array([motion[0]*np.cos(theta[i]), motion[0]*np.sin(theta[i]), motion[-1]], dtype=float)
         z = sensor_model(mu, R)
-        mu_new, _ = KF.KalmanFilter(mu, z, u, dt, motion_model)
-        print(mu_new)
-        # draw_sphere_marker((mu_new[0], mu_new[1], 0.1), 0.1, (1, 1, 0, 1))
+        mu_new = KF.KalmanFilter(mu, z, u)
+        draw_sphere_marker((mu_new[0], mu_new[1], 0.1), 0.1, (1, 1, 0, 1))
         # x_new = motion_model(mu_new, u, dt, Q)
         # draw_sphere_marker((x_new[0], x_new[1], 0.1), 0.1, (1, 1, 0, 1))
         
