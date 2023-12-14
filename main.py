@@ -66,7 +66,7 @@ def main(screenshot=False):
     # for pa in path:
     #     draw_sphere_marker((pa[0], pa[1], 0.1), 0.1, (1, 1, 0, 1))
     #     set_joint_positions(robots['pr2'], base_joints, pa)
-        
+
     # Keep graphics window opened
     wait_if_gui()
     disconnect()
