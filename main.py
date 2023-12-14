@@ -14,13 +14,13 @@ from models import sensor_model, motion_model
 param = {
     'dt': 0.1,
     'A': np.eye(3),
-    'B': np.eye(3),
+    'B': np.eye(3)*0.1,
     'C': np.eye(3),
-    'Q': np.diag([0.001, 0.001, 0.001]),
-    'R': np.diag([0.001, 0.001, 0.001]),
-    # 'Q': np.diag([1, 1, 0.05]),
-    # 'R': np.diag([0.1,0.1,0.01]),
-    'Sample_time': 100,
+    # 'Q': np.diag([0.001, 0.001, 0.001]),
+    # 'R': np.diag([0.001, 0.001, 0.001]),
+    'Q': np.diag([0.5, 0.5, 0.5]),
+    'R': np.diag([0.1, 0.1, 0.1]),
+    'Sample_time': 300,
     'Sample_cov': np.diag([0.1, 0.1, 0.1])  # covariance of sampling
 }
 
@@ -53,20 +53,34 @@ def main(screenshot=False):
     motion_input, theta = get_motion()
     
     # # Kalman Filter    
+    # for i, motion in enumerate(motion_input):
+    #     mu = tuple(get_joint_positions(robots['pr2'], base_joints))
+    #     u = np.array([motion[0]*np.cos(theta[i]), motion[0]*np.sin(theta[i]), motion[-1]], dtype=float)
+    #     z = sensor_model(path[i+1], R)
+    #     mu_new = KF.KalmanFilter(mu, z, u) 
+    #     with open("output.txt", "a") as f:
+    #         for t in mu_new:
+    #             f.write(f"{t}\n")
+    #     draw_sphere_marker((mu_new[0], mu_new[1], 0.1), 0.1, (1, 1, 0, 1))
+    #     set_joint_positions(robots['pr2'], base_joints, mu_new)
+
+    # PF
+    # path = get_path_pf()
+    PF = ParticleFilter(param)
+
     for i, motion in enumerate(motion_input):
+        motion = motion_input[i]
         mu = tuple(get_joint_positions(robots['pr2'], base_joints))
-        u = np.array([motion[0]*np.cos(theta[i]), motion[0]*np.sin(theta[i]), motion[-1]], dtype=float)
-        z = sensor_model(mu, R)
-        mu_new, _ = KF.KalmanFilter(mu, z, u, dt, motion_model)
-        print(mu_new)
-        # draw_sphere_marker((mu_new[0], mu_new[1], 0.1), 0.1, (1, 1, 0, 1))
-        # x_new = motion_model(mu_new, u, dt, Q)
-        # draw_sphere_marker((x_new[0], x_new[1], 0.1), 0.1, (1, 1, 0, 1))
-        
-        # hardcode
-        # x_new = np.random.multivariate_normal(mu_new, Q, 1)[0]
-        # Execute planned path
-        set_joint_positions(robots['pr2'], base_joints, mu_new)
+        u = np.array([float(motion[0]*np.cos(theta[i])), float(motion[0]*np.sin(theta[i])), motion[-1]])
+        if i+1 == len(path):
+            wait_if_gui()
+            print("PF finished")
+            break
+        z = sensor_model(path[i+1], R)
+        pose_estimated = PF.ParticleFilter(u, z, i%66==0)
+
+        draw_sphere_marker((pose_estimated[0], pose_estimated[1], 0.1), 0.1, (1, 0, 0, 1))
+        set_joint_positions(robots['pr2'], base_joints, pose_estimated)
         
     # execute_trajectory(robots['pr2'], base_joints, path, sleep=0.2)
     # Keep graphics window opened

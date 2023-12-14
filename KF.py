@@ -21,6 +21,8 @@ class KalmanFilter:
         K = Sigma_bar @ self.C.T @ np.linalg.inv(self.C @ Sigma_bar @ self.C.T + self.Q)
         mu_new = mu_bar + K @ (z - self.C @ mu_bar)
         Sigma_new = (np.eye(Sigma_bar.shape[0]) - K @ self.C) @ Sigma_bar
+
+        self.Sigma = Sigma_new
         
         # mu_new = mu; Sigma_new = Sigma #comment this out to use your code
         ###YOUR CODE HERE###
