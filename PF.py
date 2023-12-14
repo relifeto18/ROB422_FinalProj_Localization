@@ -76,3 +76,4 @@ class ParticleFilter:
         self.X = X_upd
         # self.W = W_upd
         return np.mean(X_upd, axis=0)
+
