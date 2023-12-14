@@ -5,16 +5,14 @@ class KalmanFilter:
         self.A = param['A']
         self.B = param['B']
         self.C = param['C']
-        self.Q = param['Q']   # motion noise
-        self.R = param['R']   # sensor noise
-        self.Sigma = np.diag([0.001, 0.001, 0.001])
+        self.Q = param['Q']   # sensor noise
+        self.R = param['R']   # motion noise
+        self.Sigma = np.eye(3)
         
-    ## HW5 code
-    def KalmanFilter(self, mu: list, z: list, u: list, dt, motion_model):
+    def KalmanFilter(self, mu: list, z: list, u: list):
 
         #prediction step    
-        # mu_bar = self.A @ mu + self.B @ u * 0.1
-        mu_bar = motion_model(mu, u, dt, self.Q)
+        mu_bar = self.A @ mu + self.B @ u
         Sigma_bar = self.A @ self.Sigma @ self.A.T + self.R
 
         #correction step
@@ -24,6 +22,6 @@ class KalmanFilter:
 
         self.Sigma = Sigma_new
         
-        # mu_new = mu; Sigma_new = Sigma #comment this out to use your code
-        ###YOUR CODE HERE###
+        self.Sigma = Sigma_new
+        
         return mu_new, Sigma_new

@@ -35,18 +35,18 @@ class ParticleFilter:
             x_next_noise = np.random.multivariate_normal([0, 0, 0], self.Q)
             x_next = self.A @ x + self.B @ u + x_next_noise
             if draw:
-                draw_sphere_marker((x_next[0], x_next[1], 0.1), 0.1, (1, 1, 0, 1))
+                draw_sphere_marker((x_next[0], x_next[1], 0.05), 0.05, (1, 1, 0, 1))
             X_pred[i] = x_next
         # Update step
-        W_upd = np.zeros(Np)
+        W_pred = np.zeros(Np)
         for i in range(Np):
             x = X_pred[i]
             p_z = stats.multivariate_normal.pdf(z, x, self.sensor_cov)
-            W_upd[i] = self.W[i] * p_z
-        W_upd = W_upd / np.sum(W_upd) # normalize the weights
+            W_pred[i] = self.W[i] * p_z
+        W_pred = W_pred / np.sum(W_pred) # normalize the weights
         
         self.X = X_pred
-        self.W = W_upd
+        self.W = W_pred
         # # # Resample step
         # X_upd = np.zeros((Np, 3))
         # indices = np.random.choice(Np, Np, p=W_upd) # resample with replacement
@@ -99,3 +99,4 @@ class ParticleFilter:
 
         return [x_mean, y_mean, np.arctan2(sin_theta_mean, cos_theta_mean)]
         # return np.mean(self.X, axis=0)
+
