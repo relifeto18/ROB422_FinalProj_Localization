@@ -112,6 +112,8 @@ def main(screenshot=False):
     # visualize
     kf_err = np.linalg.norm(np.vstack(KF_error.copy()), axis=1)
     sensor_err = np.linalg.norm(np.vstack(sensor_error.copy()), axis=1)
+    # print("KF error mean: ", np.mean(kf_err))
+    # print("Sensor error mean: ", np.mean(sensor_err))
     sensor_data = np.vstack(sensor_data)[:, :2]
     estimation = np.vstack(estimation)[:, :2]
     ground = path[:, :2].copy()
