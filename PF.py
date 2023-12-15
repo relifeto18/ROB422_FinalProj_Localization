@@ -11,6 +11,7 @@ class ParticleFilter:
         self.A = param['A']
         self.B = param['B']
         self.init_state = [0.0, 5.5, -1.57]
+        # self.init_state = [2.0, 5.5, -1.57]
         self.particles = np.random.multivariate_normal(self.init_state, self.init_cov, self.sample_times)
         self.W = np.ones(self.sample_times) / self.sample_times
         self.count = 0

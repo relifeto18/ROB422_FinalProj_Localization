@@ -22,6 +22,7 @@ def sensor_model(z, noise):
     # sigma: standard deviation of the sensor noise
     # returns: noisy measurement of the state vector
     
+    # sensor_noise = np.random.multivariate_normal([2.0, 5.5, -1.57], noise)
     sensor_noise = np.random.multivariate_normal([0, 0, 0], noise)
     z += sensor_noise
     

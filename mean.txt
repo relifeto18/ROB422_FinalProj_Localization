@@ -67,6 +67,7 @@ Sensor error mean:  0.5064980606559878
 since there's not much difference in error between 1000 and 500 sample time, choose 500 to save computational resource and keep accuracy
 run time should compared without plotting (should be tested later)
 
+
 change sample covariance
 'Q': np.diag([0.1, 0.1, 0.1]), 
 'R': np.diag([0.1, 0.1, 0.1]), 
@@ -117,11 +118,21 @@ Sensor error mean:  0.4953688092718899
 'Sample_time': 500,
 'Sample_cov': np.diag([0.2, 0.2, 0.2])
 
+Particle Filter run time:  897.1047010421753
+PF error mean:  0.4663270701651364
+Sensor error mean:  0.7024673937325895
+
 ##
 'Q': np.diag([0.05, 0.05, 0.05]), 
 'R': np.diag([0.1, 0.1, 0.1]), 
 'Sample_time': 500,
 'Sample_cov': np.diag([0.2, 0.2, 0.2])
+
+Particle Filter run time:  884.4435863494873
+PF error mean:  0.39186676310826607
+Sensor error mean:  0.3638615442550329
+
+the sensor noise affect the accuracy, a larger noise leads to a larger error
 
 
 change motion noise
@@ -130,11 +141,19 @@ change motion noise
 'Sample_time': 500,
 'Sample_cov': np.diag([0.2, 0.2, 0.2])
 
+Particle Filter run time:  909.4055104255676
+PF error mean:  0.41687274012216025
+Sensor error mean:  0.4953688092718899
+
 ##
 'Q': np.diag([0.1, 0.1, 0.1]), 
 'R': np.diag([0.2, 0.2, 0.2]), 
 'Sample_time': 500,
 'Sample_cov': np.diag([0.2, 0.2, 0.2])
+
+Particle Filter run time:  884.0056872367859
+PF error mean:  0.5589520055580139
+Sensor error mean:  0.5047679598578328
 
 ##
 'Q': np.diag([0.1, 0.1, 0.1]), 
@@ -142,9 +161,19 @@ change motion noise
 'Sample_time': 500,
 'Sample_cov': np.diag([0.2, 0.2, 0.2])
 
+Particle Filter run time:  891.4730653762817
+PF error mean:  0.3287464714016917
+Sensor error mean:  0.5031625798053738
 
-interesting case: with large noise, the robot may stuck inside the narrow space
-'Q': np.diag([0.5, 0.5, 0.5]), 
-'R': np.diag([0.5, 0.5, 0.5]), 
+the motion noise affect the accuracy, a larger noise leads to a larger error
+
+
+interesting case: the robot starting position was set inside the obstacle
+'Q': np.diag([0.1, 0.1, 0.1]), 
+'R': np.diag([0.1, 0.1, 0.1]), 
 'Sample_time': 500,
-'Sample_cov': np.diag([0.2, 0.2, 0.2])
+'Sample_cov': np.diag([0.5, 0.5, 0.5])
+self.init_state = [2.0, 5.5, -1.57]   # for PF
+sensor_noise = np.random.multivariate_normal([2.0, 5.5, -1.57], noise)   # for KF
+
+the sample covariance was set larger to ensure it can successfully detect the sensor mearsurement

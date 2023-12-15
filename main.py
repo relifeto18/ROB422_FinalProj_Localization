@@ -19,13 +19,13 @@ param = {
     'A': np.eye(3),
     'B': np.eye(3) * 0.1,
     'C': np.eye(3),
-    'Q': np.diag([0.2, 0.2, 0.2]),    # sensor noise
+    'Q': np.diag([0.1, 0.1, 0.1]),    # sensor noise
     'R': np.diag([0.1, 0.1, 0.1]),    # motion noise
     'Sample_time': 500,
-    'Sample_cov': np.diag([0.2, 0.2, 0.2])   # covariance of initial sampling
+    'Sample_cov': np.diag([0.5, 0.5, 0.5])   # covariance of initial sampling
 }
 
-def main(filter="PF"):
+def main(filter="KF"):
     # initialize PyBullet
     connect(use_gui=True)
     # load robot and obstacle resources
@@ -45,8 +45,8 @@ def main(filter="PF"):
     
     path = get_path()
     draw_path()
-    draw_KF = False
-    draw_PF = True
+    draw_KF = True
+    draw_PF = False
     plot_cov = False
     
     KF_error = []
