@@ -95,16 +95,16 @@ class ParticleFilter:
         #         # filtered_points.append()
         #         draw_sphere_marker((self.X[i][0], self.X[i][1], 0.05), 0.05, (1, 1, 0, 1))
 
-        sum_weight_10 = 0
-        for i in range(Np//10):
-            sum_weight_10 += self.W[i]
+        # sum_weight_10 = 0
+        # for i in range(Np//10):
+            # sum_weight_10 += self.W[i]
 
         # calculate pose
-        for i in range(Np//10):
-            x_mean += self.W[i] * self.X[i][0]/sum_weight_10
-            y_mean += self.W[i] * self.X[i][1]/sum_weight_10
-            cos_theta_mean += self.W[i] * np.cos(self.X[i][2])/sum_weight_10
-            sin_theta_mean += self.W[i] * np.sin(self.X[i][2])/sum_weight_10
+        for i in range(Np):
+            x_mean += self.W[i] * self.X[i][0]
+            y_mean += self.W[i] * self.X[i][1]
+            cos_theta_mean += self.W[i] * np.cos(self.X[i][2])
+            sin_theta_mean += self.W[i] * np.sin(self.X[i][2])
 
         return np.array([x_mean, y_mean, np.arctan2(sin_theta_mean, cos_theta_mean)])
         # # return np.mean(self.X, axis=0)

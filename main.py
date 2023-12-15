@@ -19,10 +19,9 @@ param = {
     'A': np.eye(3),
     'B': np.eye(3) * 0.1,
     'C': np.eye(3),
-    'Q': np.diag([0.1, 0.1, 0.1]),    # sensor noise
+    'Q': np.diag([0.05, 0.05, 0.05]),    # sensor noise
     'R': np.diag([0.01, 0.01, 0.01]),    # motion noise
-
-    'Sample_time': 300,
+    'Sample_time': 1000,
     'Sample_cov': np.diag([0.01, 0.01, 0.01])   # covariance of sampling
 }
 
@@ -137,10 +136,6 @@ def main(screenshot=False):
         
         for i, motion in enumerate(motion_input):
             u = np.array([float(motion[0]*np.cos(theta[i])), float(motion[0]*np.sin(theta[i])), motion[-1]])
-            if i+1 == len(path):
-                wait_if_gui()
-                print("PF finished")
-                break
             z = sensor_model(path[i+1].copy(), Q)
             pose_estimated = PF.ParticleFilter(u, z, False)
             
