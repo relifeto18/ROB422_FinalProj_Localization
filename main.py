@@ -20,34 +20,37 @@ param = {
     'B': np.eye(3) * 0.1,
     'C': np.eye(3),
     'Q': np.diag([0.1, 0.1, 0.1]),    # sensor noise
-    'R': np.diag([0.05, 0.05, 0.05]),    # motion noise
+    'R': np.diag([0.1, 0.1, 0.1]),    # motion noise
     'Sample_time': 500,
     'Sample_cov': np.diag([0.2, 0.2, 0.2])   # covariance of initial sampling
 }
 
 def main(filter="KF"):
-    # initialize PyBullet
-    connect(use_gui=True)
-    # load robot and obstacle resources
-    p.setAdditionalSearchPath(pd.getDataPath())
-    planeId = p.loadURDF('plane.urdf', useFixedBase=True)
-    p.changeDynamics(planeId, -1, lateralFriction=0.99)
-    # set camera
-    p.resetDebugVisualizerCamera(cameraDistance=13.5,
-                                    cameraYaw=0,
-                                    cameraPitch=-89,
-                                    cameraTargetPosition=[15, 5, 0])
-    robots, obstacles = load_env('rob.json')
+    # # initialize PyBullet
+    # connect(use_gui=True)
+    # # load robot and obstacle resources
+    # p.setAdditionalSearchPath(pd.getDataPath())
+    # planeId = p.loadURDF('plane.urdf', useFixedBase=True)
+    # p.changeDynamics(planeId, -1, lateralFriction=0.99)
+    # # set camera
+    # p.resetDebugVisualizerCamera(cameraDistance=13.5,
+    #                                 cameraYaw=0,
+    #                                 cameraPitch=-89,
+    #                                 cameraTargetPosition=[15, 5, 0])
+    # robots, obstacles = load_env('rob.json')
     
-    # define active DoFs
-    base_joints = [joint_from_name(robots['pr2'], name) for name in PR2_GROUPS['base']]
-    collision_fn = get_collision_fn_PR2(robots['pr2'], base_joints, list(obstacles.values()))
+    # # define active DoFs
+    # base_joints = [joint_from_name(robots['pr2'], name) for name in PR2_GROUPS['base']]
+    # collision_fn = get_collision_fn_PR2(robots['pr2'], base_joints, list(obstacles.values()))
     
-    path = get_path()
-    draw_path()
+    # path = get_path()
+    # draw_path()
+    # ground = path[:, :2].copy()
+    
     draw_KF = False
     draw_PF = False
-    plot_cov = True
+    draw_sample = False
+    plot_cov = False
     
     KF_error = []
     KF_sensor_error = []
@@ -57,16 +60,35 @@ def main(filter="KF"):
     PF_sensor_error = []
     PF_sensor_data = []
     PF_estimation = []
-    ground = path[:, :2].copy()
     
     KF = KalmanFilter(param)
     PF = ParticleFilter(param)
     Q = param["Q"]   # sensor noise
     motion_input, theta = get_motion()
 
-
     ################ Kalman Filter ################
     if filter == "KF":
+        # initialize PyBullet
+        connect(use_gui=True)
+        # load robot and obstacle resources
+        p.setAdditionalSearchPath(pd.getDataPath())
+        planeId = p.loadURDF('plane.urdf', useFixedBase=True)
+        p.changeDynamics(planeId, -1, lateralFriction=0.99)
+        # set camera
+        p.resetDebugVisualizerCamera(cameraDistance=13.5,
+                                        cameraYaw=0,
+                                        cameraPitch=-89,
+                                        cameraTargetPosition=[15, 5, 0])
+        robots, obstacles = load_env('rob.json')
+        
+        # define active DoFs
+        base_joints = [joint_from_name(robots['pr2'], name) for name in PR2_GROUPS['base']]
+        collision_fn = get_collision_fn_PR2(robots['pr2'], base_joints, list(obstacles.values()))
+        
+        path = get_path()
+        draw_path()
+        ground = path[:, :2].copy()
+    
         print("Kalman Filter running: expected 10s.")
         
         # initialize covariance plot
@@ -127,21 +149,42 @@ def main(filter="KF"):
     
         # visualize
         kf_err = np.linalg.norm(np.vstack(KF_error.copy()), axis=1)
-        sensor_err = np.linalg.norm(np.vstack(KF_sensor_error.copy()), axis=1)
-        sensor_data = np.vstack(KF_sensor_data)[:, :2]
-        estimation = np.vstack(KF_estimation)[:, :2]
-        plot_kf = Plot_KF(len(kf_err), kf_err, sensor_err, sensor_data, estimation, ground)
+        kf_sensor_err = np.linalg.norm(np.vstack(KF_sensor_error.copy()), axis=1)
+        kf_sensor_data = np.vstack(KF_sensor_data)[:, :2]
+        kf_estimation = np.vstack(KF_estimation)[:, :2]
+        plot_kf = Plot_KF(len(kf_err), kf_err, kf_sensor_err, kf_sensor_data, kf_estimation, ground)
         plot_kf.show_plots()
         
         print("KF error mean: ", np.mean(kf_err))
-        print("Sensor error mean: ", np.mean(sensor_err))
+        print("Sensor error mean: ", np.mean(kf_sensor_err))
 
         wait_if_gui()
         disconnect()
     
+    filter = "PF"
     
     ################ Particle Filter ################
     if filter == "PF":
+        # initialize PyBullet
+        connect(use_gui=True)
+        # load robot and obstacle resources
+        p.setAdditionalSearchPath(pd.getDataPath())
+        planeId = p.loadURDF('plane.urdf', useFixedBase=True)
+        p.changeDynamics(planeId, -1, lateralFriction=0.99)
+        # set camera
+        p.resetDebugVisualizerCamera(cameraDistance=13.5,
+                                        cameraYaw=0,
+                                        cameraPitch=-89,
+                                        cameraTargetPosition=[15, 5, 0])
+        robots, obstacles = load_env('rob.json')
+        
+        # define active DoFs
+        base_joints = [joint_from_name(robots['pr2'], name) for name in PR2_GROUPS['base']]
+        collision_fn = get_collision_fn_PR2(robots['pr2'], base_joints, list(obstacles.values()))
+        
+        path = get_path()
+        draw_path()
+        ground = path[:, :2].copy()
         print("Particle Filter running: expected 30s.")
         
         start_time = time.time()
@@ -149,7 +192,7 @@ def main(filter="KF"):
         for i, motion in enumerate(motion_input):
             u = np.array([float(motion[0]*np.cos(theta[i])), float(motion[0]*np.sin(theta[i])), motion[-1]])   # control input
             z = sensor_model(path[i+1].copy(), Q)   # noisy measurement
-            pose_estimated = PF.PF_update(u, z, draw=True)   # Partical Filter
+            pose_estimated = PF.PF_update(u, z, draw=draw_sample)   # Partical Filter
     
             PF_error.append(path[i+1] - pose_estimated)
             PF_sensor_error.append(path[i+1] - z)
@@ -167,24 +210,26 @@ def main(filter="KF"):
         
         # visualize
         pf_err = np.linalg.norm(np.vstack(PF_error.copy()), axis=1)
-        sensor_err = np.linalg.norm(np.vstack(PF_sensor_error.copy()), axis=1)
-        sensor_data = np.vstack(PF_sensor_data)[:, :2]
-        estimation = np.vstack(PF_estimation)[:, :2]
-        plot_pf = Plot_PF(len(pf_err), pf_err, sensor_err, sensor_data, estimation, ground)
+        pf_sensor_err = np.linalg.norm(np.vstack(PF_sensor_error.copy()), axis=1)
+        pf_sensor_data = np.vstack(PF_sensor_data)[:, :2]
+        pf_estimation = np.vstack(PF_estimation)[:, :2]
+        plot_pf = Plot_PF(len(pf_err), pf_err, pf_sensor_err, pf_sensor_data, pf_estimation, ground)
         plot_pf.show_plots()
         
         print("PF error mean: ", np.mean(pf_err))
-        print("Sensor error mean: ", np.mean(sensor_err))
+        print("Sensor error mean: ", np.mean(pf_sensor_err))
 
         wait_if_gui()
         disconnect()
     
     # plot KF vs PF data
-    # kf_err = np.linalg.norm(np.vstack(KF_error.copy()), axis=1)
-    # kf_estimation = np.vstack(KF_estimation)[:, :2]
-    # pf_err = np.linalg.norm(np.vstack(PF_error.copy()), axis=1)
-    # pf_estimation = np.vstack(PF_estimation)[:, :2]
-    # plot_compare(len(kf_err), kf_err, pf_err, kf_estimation, pf_estimation, ground)
+    kf_err = np.linalg.norm(np.vstack(KF_error.copy()), axis=1)
+    kf_estimation = np.vstack(KF_estimation)[:, :2]
+    pf_err = np.linalg.norm(np.vstack(PF_error.copy()), axis=1)
+    pf_estimation = np.vstack(PF_estimation)[:, :2]
+    N = len(kf_err)
+    num = list(range(1, N+1))
+    plot_compare(num, kf_err, pf_err, kf_estimation, pf_estimation, ground)
 
 
 if __name__ == '__main__':

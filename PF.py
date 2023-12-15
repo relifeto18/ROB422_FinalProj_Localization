@@ -58,7 +58,7 @@ class ParticleFilter:
             self.W = np.ones(N) / N
         
         # draw sampling particals
-        if (self.count - 1) % 80 == 0:
+        if (self.count - 1) % 80 == 0 and draw:
             for particle in self.particles:
                 draw_sphere_marker((particle[0], particle[1], 0.1), 0.05, (0, 1, 0, 1))
         
