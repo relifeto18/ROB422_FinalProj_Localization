@@ -26,6 +26,28 @@ param = {
     'Sample_cov': np.diag([0.2, 0.2, 0.2])   # covariance of initial sampling
 }
 
+def get_collision_fn(robot_id, joint_indices):
+    """
+    Args:
+        robot_id (int): Unique id of robot
+        joint_indices (array_like): Indices of actuated joints
+    """
+    def collision_fn(config):
+        """
+        Args:
+            config (array_like): Robot config
+        Returns:
+            bool: True if collided, else False
+        """
+        # Set joints to config
+        set_joint_positions(robot_id, joint_indices, config)
+        p.performCollisionDetection()
+        contact_points = p.getContactPoints(robot_id)
+        if len(contact_points) > 0:
+            return True
+        return False
+    return collision_fn
+
 def main(filter="KF"):
     # initialize parameters    
     draw_KF = False
@@ -37,11 +59,13 @@ def main(filter="KF"):
     KF_sensor_error = []
     KF_sensor_data = []
     KF_estimation = []
+    KF_collision = 0
     PF_error = []
     PF_sensor_error = []
     PF_sensor_data = []
     PF_estimation = []
-    
+    PF_collision = 0
+        
     KF = KalmanFilter(param)
     PF = ParticleFilter(param)
     Q = param["Q"]   # sensor noise
@@ -50,6 +74,7 @@ def main(filter="KF"):
     print("Please close all the plots and press enter to continue.")
     print("Loading Kalman Filter ...")
     time.sleep(2)
+    
 
     ################ Kalman Filter ################
     if filter == "KF":
@@ -68,7 +93,13 @@ def main(filter="KF"):
         
         # define active DoFs
         base_joints = [joint_from_name(robots['pr2'], name) for name in PR2_GROUPS['base']]
-        collision_fn = get_collision_fn_PR2(robots['pr2'], base_joints, list(obstacles.values()))
+        
+        # check collision
+        # collision_fn = get_collision_fn_PR2(robots['pr2'], base_joints, list(obstacles.values()))
+        # set_joint_positions(robots['pr2'], base_joints, [2.0, 5.5, -1.57])
+        # config = np.array(get_joint_positions(robots['pr2'], base_joints))
+        # collision_fn = get_collision_fn(robots['pr2'], base_joints)
+        # print(collision_fn(config))
         
         path = get_path()
         draw_path()
