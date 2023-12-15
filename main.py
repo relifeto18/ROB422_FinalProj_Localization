@@ -6,7 +6,7 @@ from utils import get_collision_fn_PR2, load_env, execute_trajectory, draw_spher
 from pybullet_tools.utils import connect, disconnect, get_joint_positions, wait_if_gui, set_joint_positions, joint_from_name
 from pybullet_tools.pr2_utils import PR2_GROUPS
 from path_data import get_motion, get_path, draw_path
-from vis import Plot_KF, Plot_PF
+from vis import Plot_KF, Plot_PF, plot_compare
 from KF import KalmanFilter
 from PF import ParticleFilter
 from models import sensor_model
@@ -20,9 +20,9 @@ param = {
     'B': np.eye(3) * 0.1,
     'C': np.eye(3),
     'Q': np.diag([0.1, 0.1, 0.1]),    # sensor noise
-    'R': np.diag([0.1, 0.1, 0.1]),    # motion noise
+    'R': np.diag([0.05, 0.05, 0.05]),    # motion noise
     'Sample_time': 500,
-    'Sample_cov': np.diag([0.5, 0.5, 0.5])   # covariance of initial sampling
+    'Sample_cov': np.diag([0.2, 0.2, 0.2])   # covariance of initial sampling
 }
 
 def main(filter="KF"):
@@ -45,9 +45,9 @@ def main(filter="KF"):
     
     path = get_path()
     draw_path()
-    draw_KF = True
+    draw_KF = False
     draw_PF = False
-    plot_cov = False
+    plot_cov = True
     
     KF_error = []
     KF_sensor_error = []
@@ -81,7 +81,7 @@ def main(filter="KF"):
         for i, motion in enumerate(motion_input):
             motion = motion_input[i]
             mu = tuple(get_joint_positions(robots['pr2'], base_joints))   # current state
-            u = np.array([motion[0]*np.cos(theta[i]), motion[0]*np.sin(theta[i]), motion[-1]], dtype=float)   # control input
+            u = np.array([float(motion[0]*np.cos(theta[i])), float(motion[0]*np.sin(theta[i])), motion[-1]])   # control input
             z = sensor_model(path[i+1].copy(), Q)   # noisy measurement
             mu_new, Sigma_new = KF.KalmanFilter(mu, z, u)   # Kalman Filter
             
@@ -132,6 +132,9 @@ def main(filter="KF"):
         estimation = np.vstack(KF_estimation)[:, :2]
         plot_kf = Plot_KF(len(kf_err), kf_err, sensor_err, sensor_data, estimation, ground)
         plot_kf.show_plots()
+        
+        print("KF error mean: ", np.mean(kf_err))
+        print("Sensor error mean: ", np.mean(sensor_err))
 
         wait_if_gui()
         disconnect()
@@ -169,11 +172,19 @@ def main(filter="KF"):
         estimation = np.vstack(PF_estimation)[:, :2]
         plot_pf = Plot_PF(len(pf_err), pf_err, sensor_err, sensor_data, estimation, ground)
         plot_pf.show_plots()
+        
         print("PF error mean: ", np.mean(pf_err))
         print("Sensor error mean: ", np.mean(sensor_err))
 
         wait_if_gui()
         disconnect()
+    
+    # plot KF vs PF data
+    # kf_err = np.linalg.norm(np.vstack(KF_error.copy()), axis=1)
+    # kf_estimation = np.vstack(KF_estimation)[:, :2]
+    # pf_err = np.linalg.norm(np.vstack(PF_error.copy()), axis=1)
+    # pf_estimation = np.vstack(PF_estimation)[:, :2]
+    # plot_compare(len(kf_err), kf_err, pf_err, kf_estimation, pf_estimation, ground)
 
 
 if __name__ == '__main__':

@@ -4,32 +4,62 @@ change sensor noise
 'Q': np.diag([0.05, 0.05, 0.05]), 
 'R': np.diag([0.1, 0.1, 0.1]), 
 
+Kalman Filter run time:  0.3149745464324951
+KF error mean:  0.27746139975449374
+Sensor error mean:  0.3631240321894722
+
 ##
 'Q': np.diag([0.2, 0.2, 0.2]), 
-'R': np.diag([0.1, 0.1, 0.1]), 
+'R': np.diag([0.1, 0.1, 0.1]),
+
+Kalman Filter run time:  420.9300606250763
+KF error mean:  0.4059131192279072
+Sensor error mean:  0.7031360503427048
 
 ##
 'Q': np.diag([0.1, 0.1, 0.1]), 
 'R': np.diag([0.1, 0.1, 0.1]),
+
+Kalman Filter run time:  0.31532859802246094
+KF error mean:  0.3374439046493237
+Sensor error mean:  0.5008287635391578
+
+the sensor noise affect the accuracy, a larger noise leads to a larger error
 
 
 change motion noise
 'Q': np.diag([0.1, 0.1, 0.1]), 
 'R': np.diag([0.05, 0.05, 0.05]), 
 
+Kalman Filter run time:  323.76797223091125
+KF error mean:  0.29694150698499605
+Sensor error mean:  0.5039646636474097
+
 ##
 'Q': np.diag([0.1, 0.1, 0.1]), 
 'R': np.diag([0.2, 0.2, 0.2]), 
+
+Kalman Filter run time:  424.4473235607147
+KF error mean:  0.3820923506002853
+Sensor error mean:  0.5050887539525355
 
 ##
 'Q': np.diag([0.1, 0.1, 0.1]), 
 'R': np.diag([0.1, 0.1, 0.1]), 
 
+Kalman Filter run time:  0.31532859802246094
+KF error mean:  0.3374439046493237
+Sensor error mean:  0.5008287635391578
 
-interesting case: with large noise, the robot may stuck inside the narrow space
-'Q': np.diag([0.5, 0.5, 0.5]), 
-'R': np.diag([0.5, 0.5, 0.5]), 
+the motion noise affect the accuracy, a larger noise leads to a larger error
 
+
+interesting case: the robot starting position was set inside the obstacle
+'Q': np.diag([0.1, 0.1, 0.1]), 
+'R': np.diag([0.1, 0.1, 0.1]), 
+sensor_noise = np.random.multivariate_normal([2.0, 5.5, -1.57], noise)   # for KF
+
+the KF failed to find a reasonable path
 
 ##################### PF ######################
 every 10 times resample once, every 80 times draw the particles

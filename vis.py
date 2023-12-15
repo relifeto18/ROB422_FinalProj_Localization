@@ -100,3 +100,32 @@ def plot_cov(mean, cov, plot_axes):
     ell.set_facecolor((1.0, 1.0, 1.0, 0))
     plot_axes.add_artist(ell)
     plt.scatter(mean[0,0],mean[1,0],c='r',s=5)
+    
+    
+def plot_compare(N, kf_error, pf_error, kf_estimation, pf_estimation, ground): 
+    plt.figure(1)
+    plt.plot(N, kf_error, label='Kalman Filter error', color='blue')
+    plt.plot(N, pf_error, label='Partical Filter error', color='orange')
+    plt.title('KF Error vs PF Error') 
+    plt.xlabel('Iteration Number')
+    plt.ylabel('Error')
+    plt.legend()
+    
+    kf_estimation_x = kf_estimation[:, 0]
+    kf_estimation_y = kf_estimation[:, 1]
+    pf_estimation_x = pf_estimation[:, 0]
+    pf_estimation_y = pf_estimation[:, 1]
+    ground_x = ground[:, 0]
+    ground_y = ground[:, 1]
+    
+    plt.figure(2)
+    plt.plot()
+    plt.plot(ground_x, ground_y, label='ground truth', linewidth=5, color='limegreen')
+    plt.plot(kf_estimation_x, kf_estimation_y, 'o', label='Kalman Filter Estimation', markersize=5, color='blue')
+    plt.plot(pf_estimation_x, pf_estimation_y, 'o', label='Particle Filter Estimation', markersize=5, color='red')
+    plt.title('KF Estimation vs PF Estimation') 
+    plt.xlabel('Iteration Number')
+    plt.ylabel('Estimation')
+    plt.legend()
+    
+    plt.show()
