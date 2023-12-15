@@ -27,27 +27,7 @@ param = {
 }
 
 def main(filter="KF"):
-    # # initialize PyBullet
-    # connect(use_gui=True)
-    # # load robot and obstacle resources
-    # p.setAdditionalSearchPath(pd.getDataPath())
-    # planeId = p.loadURDF('plane.urdf', useFixedBase=True)
-    # p.changeDynamics(planeId, -1, lateralFriction=0.99)
-    # # set camera
-    # p.resetDebugVisualizerCamera(cameraDistance=13.5,
-    #                                 cameraYaw=0,
-    #                                 cameraPitch=-89,
-    #                                 cameraTargetPosition=[15, 5, 0])
-    # robots, obstacles = load_env('rob.json')
-    
-    # # define active DoFs
-    # base_joints = [joint_from_name(robots['pr2'], name) for name in PR2_GROUPS['base']]
-    # collision_fn = get_collision_fn_PR2(robots['pr2'], base_joints, list(obstacles.values()))
-    
-    # path = get_path()
-    # draw_path()
-    # ground = path[:, :2].copy()
-    
+    # initialize parameters    
     draw_KF = False
     draw_PF = False
     draw_sample = False
@@ -66,6 +46,10 @@ def main(filter="KF"):
     PF = ParticleFilter(param)
     Q = param["Q"]   # sensor noise
     motion_input, theta = get_motion()
+    
+    print("Please close all the plots and press enter to continue.")
+    print("Loading Kalman Filter ...")
+    time.sleep(2)
 
     ################ Kalman Filter ################
     if filter == "KF":
@@ -163,6 +147,8 @@ def main(filter="KF"):
         disconnect()
     
     filter = "PF"
+    print("Loading Particle Filter ...")
+    time.sleep(2)
     
     ################ Particle Filter ################
     if filter == "PF":
@@ -186,7 +172,7 @@ def main(filter="KF"):
         path = get_path()
         draw_path()
         ground = path[:, :2].copy()
-        print("Particle Filter running: expected less than 40s.")
+        print("Particle Filter running: expected less than 60s.")
         
         start_time = time.time()
         
@@ -233,7 +219,7 @@ def main(filter="KF"):
     plot_compare(num, kf_err, pf_err, kf_estimation, pf_estimation, ground)
     print("KF error mean: ", np.mean(kf_err))
     print("PF error mean: ", np.mean(pf_err))
-
+    print("Bye!")
 
 if __name__ == '__main__':
     main()
