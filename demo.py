@@ -1,3 +1,3 @@
-import main
+import run
 
-main(filter="KF")
+run.main()
