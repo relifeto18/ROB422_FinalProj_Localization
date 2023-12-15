@@ -20,8 +20,8 @@ param = {
     'A': np.eye(3),
     'B': np.eye(3) * 0.1,
     'C': np.eye(3),
-    'Q': np.diag([0.05, 0.05, 0.05]),    # sensor noise
-    'R': np.diag([0.05, 0.05, 0.05]),    # motion noise
+    'Q': np.diag([0.1, 0.1, 0.1]),    # sensor noise
+    'R': np.diag([0.1, 0.1, 0.1]),    # motion noise
     'Sample_time': 500,
     'Sample_cov': np.diag([0.2, 0.2, 0.2])   # covariance of initial sampling
 }
@@ -98,7 +98,7 @@ def main(filter="KF"):
         # collision_fn = get_collision_fn_PR2(robots['pr2'], base_joints, list(obstacles.values()))
         # set_joint_positions(robots['pr2'], base_joints, [2.0, 5.5, -1.57])
         # config = np.array(get_joint_positions(robots['pr2'], base_joints))
-        # collision_fn = get_collision_fn(robots['pr2'], base_joints)
+        collision_fn = get_collision_fn(robots['pr2'], base_joints)
         # print(collision_fn(config))
         
         path = get_path()
@@ -155,6 +155,9 @@ def main(filter="KF"):
             
             # set the robot to estimated state
             set_joint_positions(robots['pr2'], base_joints, mu_new)
+            config = np.array(get_joint_positions(robots['pr2'], base_joints))
+            if collision_fn(config):
+                KF_collision += 1
 
         print("Kalman Filter run time: ", time.time() - start_time)
         
@@ -170,9 +173,6 @@ def main(filter="KF"):
         kf_estimation = np.vstack(KF_estimation)[:, :2]
         plot_kf = Plot_KF(len(kf_err), kf_err, kf_sensor_err, kf_sensor_data, kf_estimation, ground)
         plot_kf.show_plots()
-        
-        print("KF error mean: ", np.mean(kf_err))
-        print("Sensor error mean: ", np.mean(kf_sensor_err))
 
         wait_if_gui()
         disconnect()
@@ -223,6 +223,9 @@ def main(filter="KF"):
 
             # set the robot to estimated state
             set_joint_positions(robots['pr2'], base_joints, pose_estimated)
+            config = np.array(get_joint_positions(robots['pr2'], base_joints))
+            if collision_fn(config):
+                PF_collision += 1
         
         print("Particle Filter run time: ", time.time() - start_time)
         
@@ -234,9 +237,6 @@ def main(filter="KF"):
         plot_pf = Plot_PF(len(pf_err), pf_err, pf_sensor_err, pf_sensor_data, pf_estimation, ground)
         plot_pf.show_plots()
         
-        print("PF error mean: ", np.mean(pf_err))
-        print("Sensor error mean: ", np.mean(pf_sensor_err))
-
         wait_if_gui()
         disconnect()
     
@@ -248,9 +248,21 @@ def main(filter="KF"):
     N = len(kf_err)
     num = list(range(1, N+1))
     plot_compare(num, kf_err, pf_err, kf_estimation, pf_estimation, ground)
+    
+    print("\n================================================")
+    print("KF Performance ...")
+    print("KF collision times: ", KF_collision)
     print("KF error mean: ", np.mean(kf_err))
+    print("KF Sensor error mean: ", np.mean(kf_sensor_err))
+    
+    print("\n================================================")
+    print("PF Performance ...")
+    print("PF collision times: ", PF_collision)
     print("PF error mean: ", np.mean(pf_err))
-    print("Bye!")
+    print("PF Sensor error mean: ", np.mean(pf_sensor_err))
+    
+    time.sleep(2)
+    print("\nBye!")
 
 if __name__ == '__main__':
     main()
