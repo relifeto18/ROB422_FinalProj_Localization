@@ -20,8 +20,8 @@ param = {
     'A': np.eye(3),
     'B': np.eye(3) * 0.1,
     'C': np.eye(3),
-    'Q': np.diag([0.05, 0.05, 0.05]),    # sensor noise
-    'R': np.diag([0.05, 0.05, 0.05]),    # motion noise
+    'Q': np.diag([0.1, 0.1, 0.1]),    # sensor noise
+    'R': np.diag([0.1, 0.1, 0.1]),    # motion noise
     'Sample_time': 500,
     'Sample_cov': np.diag([0.2, 0.2, 0.2])   # covariance of initial sampling
 }
