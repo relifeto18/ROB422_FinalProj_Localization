@@ -171,8 +171,8 @@ def main(filter="KF"):
         plot_kf = Plot_KF(len(kf_err), kf_err, kf_sensor_err, kf_sensor_data, kf_estimation, ground)
         plot_kf.show_plots()
         
-        print("KF error mean: ", np.mean(kf_err))
-        print("Sensor error mean: ", np.mean(kf_sensor_err))
+        # print("KF error mean: ", np.mean(kf_err))
+        # print("Sensor error mean: ", np.mean(kf_sensor_err))
 
         wait_if_gui()
         disconnect()
@@ -234,8 +234,8 @@ def main(filter="KF"):
         plot_pf = Plot_PF(len(pf_err), pf_err, pf_sensor_err, pf_sensor_data, pf_estimation, ground)
         plot_pf.show_plots()
         
-        print("PF error mean: ", np.mean(pf_err))
-        print("Sensor error mean: ", np.mean(pf_sensor_err))
+        # print("PF error mean: ", np.mean(pf_err))
+        # print("Sensor error mean: ", np.mean(pf_sensor_err))
 
         wait_if_gui()
         disconnect()
@@ -248,9 +248,21 @@ def main(filter="KF"):
     N = len(kf_err)
     num = list(range(1, N+1))
     plot_compare(num, kf_err, pf_err, kf_estimation, pf_estimation, ground)
+    
+    print("\n================================================")
+    print("KF Performance ...")
+    # print("KF collision times: ", KF_collision)
     print("KF error mean: ", np.mean(kf_err))
+    print("KF Sensor error mean: ", np.mean(kf_sensor_err))
+    
+    print("\n================================================")
+    print("PF Performance ...")
+    # print("PF collision times: ", PF_collision)
     print("PF error mean: ", np.mean(pf_err))
-    print("Bye!")
+    print("PF Sensor error mean: ", np.mean(pf_sensor_err))
+    
+    time.sleep(2)
+    print("\nBye!")
 
 if __name__ == '__main__':
     main()
