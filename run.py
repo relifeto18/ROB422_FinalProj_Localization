@@ -236,7 +236,7 @@ def main(filter="KF"):
         pf_estimation = np.vstack(PF_estimation)[:, :2]
         plot_pf = Plot_PF(len(pf_err), pf_err, pf_sensor_err, pf_sensor_data, pf_estimation, ground)
         plot_pf.show_plots()
-        
+
         wait_if_gui()
         disconnect()
     
@@ -252,12 +252,14 @@ def main(filter="KF"):
     print("\n================================================")
     print("KF Performance ...")
     print("KF collision times: ", KF_collision)
+    # print("KF collision times: ", KF_collision)
     print("KF error mean: ", np.mean(kf_err))
     print("KF Sensor error mean: ", np.mean(kf_sensor_err))
     
     print("\n================================================")
     print("PF Performance ...")
     print("PF collision times: ", PF_collision)
+    # print("PF collision times: ", PF_collision)
     print("PF error mean: ", np.mean(pf_err))
     print("PF Sensor error mean: ", np.mean(pf_sensor_err))
     
