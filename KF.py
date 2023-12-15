@@ -22,6 +22,4 @@ class KalmanFilter:
 
         self.Sigma = Sigma_new
         
-        self.Sigma = Sigma_new
-        
         return mu_new, Sigma_new

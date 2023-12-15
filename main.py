@@ -6,7 +6,7 @@ from utils import get_collision_fn_PR2, load_env, execute_trajectory, draw_spher
 from pybullet_tools.utils import connect, disconnect, get_joint_positions, wait_if_gui, set_joint_positions, joint_from_name, get_link_pose, link_from_name
 from pybullet_tools.pr2_utils import PR2_GROUPS
 from path_data import get_motion, get_path, draw_path
-from vis import Plot_KF, plot_cov
+from vis import Plot_KF, plot_cov, Plot_PF
 from KF import KalmanFilter
 from PF import ParticleFilter
 from models import sensor_model, motion_model
@@ -19,10 +19,10 @@ param = {
     'A': np.eye(3),
     'B': np.eye(3) * 0.1,
     'C': np.eye(3),
-    'Q': np.diag([0.5, 0.5, 0.5]),    # sensor noise
+    'Q': np.diag([0.1, 0.1, 0.1]),    # sensor noise
     'R': np.diag([0.01, 0.01, 0.01]),    # motion noise
     'Sample_time': 300,
-    'Sample_cov': np.diag([0.1, 0.1, 0.1])   # covariance of sampling
+    'Sample_cov': np.diag([0.01, 0.01, 0.01])   # covariance of sampling
 }
 
 def main(screenshot=False):
@@ -47,10 +47,16 @@ def main(screenshot=False):
     draw_path()
     filter = "PF"
     KF_error = []
-    sensor_error = []
-    sensor_data = []
-    estimation = []
+    KF_sensor_error = []
+    KF_sensor_data = []
+    KF_estimation = []
+    PF_error = []
+    PF_sensor_error = []
+    PF_sensor_data = []
+    PF_estimation = []
+    ground = path[:, :2].copy()
     draw_KF = False
+    draw_PF = True
     plot_cov = False
     
     dt = 0.1
@@ -67,6 +73,7 @@ def main(screenshot=False):
             plot_axes = plt.subplot(111, aspect='equal')  
             plot_axes.set_xlim([-2.5, 10])  # Adjust these values as needed
             plot_axes.set_ylim([-2.5, 10])
+        
         start_time = time.time()
         
         for i, motion in enumerate(motion_input):
@@ -76,10 +83,11 @@ def main(screenshot=False):
             u = np.array([motion[0]*np.cos(theta[i]), motion[0]*np.sin(theta[i]), motion[-1]], dtype=float)
             z = sensor_model(path[i+1].copy(), Q)
             mu_new, Sigma_new = KF.KalmanFilter(mu, z, u) 
+            
             KF_error.append(path[i+1] - mu_new)
-            sensor_error.append(path[i+1] - z)
-            sensor_data.append(z)
-            estimation.append(mu_new)
+            KF_sensor_error.append(path[i+1] - z)
+            KF_sensor_data.append(z)
+            KF_estimation.append(mu_new)
             
             # plot cov
             if plot_cov:
@@ -115,27 +123,47 @@ def main(screenshot=False):
     
         # visualize
         kf_err = np.linalg.norm(np.vstack(KF_error.copy()), axis=1)
-        sensor_err = np.linalg.norm(np.vstack(sensor_error.copy()), axis=1)
-        sensor_data = np.vstack(sensor_data)[:, :2]
-        estimation = np.vstack(estimation)[:, :2]
-        ground = path[:, :2].copy()
-        plot_kf = Plot_KF(len(KF_error), kf_err, sensor_err, sensor_data, estimation, ground)
+        sensor_err = np.linalg.norm(np.vstack(KF_sensor_error.copy()), axis=1)
+        sensor_data = np.vstack(KF_sensor_data)[:, :2]
+        estimation = np.vstack(KF_estimation)[:, :2]
+        plot_kf = Plot_KF(len(kf_err), kf_err, sensor_err, sensor_data, estimation, ground)
         plot_kf.show_plots()
     
     
     ################ Particle Filter ################
     if filter == "PF":
+        start_time = time.time()
+        
         for i, motion in enumerate(motion_input):
             u = np.array([float(motion[0]*np.cos(theta[i])), float(motion[0]*np.sin(theta[i])), motion[-1]])
             if i+1 == len(path):
                 wait_if_gui()
                 print("PF finished")
                 break
-            z = sensor_model(path[i+1], R)
-            pose_estimated = PF.ParticleFilter(u, z, i%50==0)
-
-            draw_sphere_marker((pose_estimated[0], pose_estimated[1], 0.1), 0.1, (0, 0, 1, 1))
+            z = sensor_model(path[i+1].copy(), Q)
+            pose_estimated = PF.ParticleFilter(u, z, False)
+            
+            PF_error.append(path[i+1] - pose_estimated)
+            PF_sensor_error.append(path[i+1] - z)
+            PF_sensor_data.append(z)
+            PF_estimation.append(pose_estimated)
+            
+            if draw_PF:
+                draw_sphere_marker((pose_estimated[0], pose_estimated[1], 0.1), 0.1, (0, 0, 1, 1))
+            
             set_joint_positions(robots['pr2'], base_joints, pose_estimated)
+        
+        print("Particle Filter run time: ", time.time() - start_time)
+        
+        # visualize
+        pf_err = np.linalg.norm(np.vstack(PF_error.copy()), axis=1)
+        sensor_err = np.linalg.norm(np.vstack(PF_sensor_error.copy()), axis=1)
+        sensor_data = np.vstack(PF_sensor_data)[:, :2]
+        estimation = np.vstack(PF_estimation)[:, :2]
+        plot_pf = Plot_PF(len(pf_err), pf_err, sensor_err, sensor_data, estimation, ground)
+        plot_pf.show_plots()
+        print("PF error mean: ", np.mean(pf_err))
+        print("Sensor error mean: ", np.mean(sensor_err))
 
  
     # Test Path
