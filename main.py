@@ -13,14 +13,15 @@ from models import sensor_model
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse
 
+np.set_printoptions(precision=20)
 
 param = {
     'dt': 0.1,
     'A': np.eye(3),
     'B': np.eye(3) * 0.1,
     'C': np.eye(3),
-    'Q': np.diag([0.1, 0.1, 0.1]),    # sensor noise
-    'R': np.diag([0.1, 0.1, 0.1]),    # motion noise
+    'Q': np.diag([0.05, 0.05, 0.05]),    # sensor noise
+    'R': np.diag([0.05, 0.05, 0.05]),    # motion noise
     'Sample_time': 500,
     'Sample_cov': np.diag([0.2, 0.2, 0.2])   # covariance of initial sampling
 }
@@ -89,7 +90,7 @@ def main(filter="KF"):
         draw_path()
         ground = path[:, :2].copy()
     
-        print("Kalman Filter running: expected 10s.")
+        print("Kalman Filter running: expected less than 10s.")
         
         # initialize covariance plot
         if plot_cov:
@@ -185,7 +186,7 @@ def main(filter="KF"):
         path = get_path()
         draw_path()
         ground = path[:, :2].copy()
-        print("Particle Filter running: expected 30s.")
+        print("Particle Filter running: expected less than 40s.")
         
         start_time = time.time()
         
@@ -230,6 +231,8 @@ def main(filter="KF"):
     N = len(kf_err)
     num = list(range(1, N+1))
     plot_compare(num, kf_err, pf_err, kf_estimation, pf_estimation, ground)
+    print("KF error mean: ", np.mean(kf_err))
+    print("PF error mean: ", np.mean(pf_err))
 
 
 if __name__ == '__main__':

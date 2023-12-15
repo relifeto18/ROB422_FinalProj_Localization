@@ -2,6 +2,8 @@ import numpy as np
 import scipy.stats as stats
 from utils import draw_sphere_marker
 
+np.set_printoptions(precision=10)
+
 class ParticleFilter:
     def __init__(self, param: list):
         self.sample_times = param["Sample_time"]
@@ -40,22 +42,21 @@ class ParticleFilter:
             
         self.W /= weights_sum   # normalize
                 
-        if self.count % 10 == 0:
-            # low_variance_resample
-            N = self.sample_times
-            X_resampled = np.zeros_like(self.particles)
-            cum_sum = np.cumsum(self.W)
-            step = 1.0 / N
-            position = np.random.uniform(0, step)
-            i, count = 0, 0
-            for m in range(N):
-                while position > cum_sum[i]:
-                    i += 1
-                X_resampled[m] = self.particles[i]
-                position += step
+        # low_variance_resample
+        N = self.sample_times
+        X_resampled = np.zeros_like(self.particles)
+        cum_sum = np.cumsum(self.W)
+        step = 1.0 / N
+        position = np.random.uniform(0, step)
+        i, count = 0, 0
+        for m in range(N):
+            while position > cum_sum[i]:
+                i += 1
+            X_resampled[m] = self.particles[i]
+            position += step
             
-            self.particles = X_resampled
-            self.W = np.ones(N) / N
+        self.particles = X_resampled
+        self.W = np.ones(N) / N
         
         # draw sampling particals
         if (self.count - 1) % 80 == 0 and draw:

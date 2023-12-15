@@ -4,17 +4,17 @@ change sensor noise
 'Q': np.diag([0.05, 0.05, 0.05]), 
 'R': np.diag([0.1, 0.1, 0.1]), 
 
-Kalman Filter run time:  0.3149745464324951
-KF error mean:  0.27746139975449374
-Sensor error mean:  0.3631240321894722
+Kalman Filter run time:  0.31087327003479004
+KF error mean:  0.2692382740993111
+Sensor error mean:  0.354955930432798
 
 ##
 'Q': np.diag([0.2, 0.2, 0.2]), 
 'R': np.diag([0.1, 0.1, 0.1]),
 
-Kalman Filter run time:  420.9300606250763
-KF error mean:  0.4059131192279072
-Sensor error mean:  0.7031360503427048
+Kalman Filter run time:  0.30663228034973145
+KF error mean:  0.40780907711136877
+Sensor error mean:  0.7088867215895535
 
 ##
 'Q': np.diag([0.1, 0.1, 0.1]), 
@@ -31,17 +31,17 @@ change motion noise
 'Q': np.diag([0.1, 0.1, 0.1]), 
 'R': np.diag([0.05, 0.05, 0.05]), 
 
-Kalman Filter run time:  323.76797223091125
-KF error mean:  0.29694150698499605
-Sensor error mean:  0.5039646636474097
+Kalman Filter run time:  0.3192412853240967
+KF error mean:  0.30490262181792616
+Sensor error mean:  0.5166392321672727
 
 ##
 'Q': np.diag([0.1, 0.1, 0.1]), 
 'R': np.diag([0.2, 0.2, 0.2]), 
 
-Kalman Filter run time:  424.4473235607147
-KF error mean:  0.3820923506002853
-Sensor error mean:  0.5050887539525355
+Kalman Filter run time:  0.3150362968444824
+KF error mean:  0.38405419907227895
+Sensor error mean:  0.507093148745311
 
 ##
 'Q': np.diag([0.1, 0.1, 0.1]), 
@@ -70,9 +70,9 @@ change number of particle
 'Sample_time': 100,
 'Sample_cov': np.diag([0.2, 0.2, 0.2])
 
-Particle Filter run time:  259.2349953651428
-PF error mean:  0.5200310315134417
-Sensor error mean:  0.5104157568384022
+Particle Filter run time:  6.940377712249756
+PF error mean:  0.3387553740978514
+Sensor error mean:  0.49804188832966845
 
 ##
 'Q': np.diag([0.1, 0.1, 0.1]), 
@@ -80,9 +80,9 @@ Sensor error mean:  0.5104157568384022
 'Sample_time': 500,
 'Sample_cov': np.diag([0.2, 0.2, 0.2])
 
-Particle Filter run time:  909.4055104255676
-PF error mean:  0.41687274012216025
-Sensor error mean:  0.4953688092718899
+Particle Filter run time:  33.342034101486206
+PF error mean:  0.33454719599013266
+Sensor error mean:  0.49698476442848366
 
 ##
 'Q': np.diag([0.1, 0.1, 0.1]), 
@@ -90,9 +90,9 @@ Sensor error mean:  0.4953688092718899
 'Sample_time': 1000,
 'Sample_cov': np.diag([0.2, 0.2, 0.2])
 
-Particle Filter run time:  1689.6501863002777
-PF error mean:  0.3945795791073493
-Sensor error mean:  0.5064980606559878
+Particle Filter run time:  66.19457840919495
+PF error mean:  0.3372894027743705
+Sensor error mean:  0.496869480236143
 
 since there's not much difference in error between 1000 and 500 sample time, choose 500 to save computational resource and keep accuracy
 run time should compared without plotting (should be tested later)
@@ -104,9 +104,9 @@ change sample covariance
 'Sample_time': 500,
 'Sample_cov': np.diag([0.2, 0.2, 0.2])
 
-Particle Filter run time:  909.4055104255676
-PF error mean:  0.41687274012216025
-Sensor error mean:  0.4953688092718899
+Particle Filter run time:  33.342034101486206
+PF error mean:  0.33454719599013266
+Sensor error mean:  0.49698476442848366
 
 ##
 'Q': np.diag([0.1, 0.1, 0.1]), 
@@ -114,9 +114,9 @@ Sensor error mean:  0.4953688092718899
 'Sample_time': 500,
 'Sample_cov': np.diag([0.5, 0.5, 0.5])
 
-Particle Filter run time:  888.2086334228516
-PF error mean:  0.4266476591036244
-Sensor error mean:  0.5028238778052536
+Particle Filter run time:  33.234864711761475
+PF error mean:  0.34457812869230114
+Sensor error mean:  0.5101989849192053
 
 ##
 'Q': np.diag([0.1, 0.1, 0.1]), 
@@ -124,9 +124,9 @@ Sensor error mean:  0.5028238778052536
 'Sample_time': 500,
 'Sample_cov': np.diag([0.8, 0.8, 0.8])
 
-Particle Filter run time:  896.428560256958
-PF error mean:  0.4149249133864428
-Sensor error mean:  0.4955277618700313
+Particle Filter run time:  34.087162733078
+PF error mean:  0.337981500035317
+Sensor error mean:  0.5042768343580437
 
 changing sample covariance does not affect the accuracy of the system, it only impact the initial estimation, as you can see in the figures, 
 a larger covariance will lead to a bigger prediction area
@@ -138,9 +138,9 @@ change sensor noise
 'Sample_time': 500,
 'Sample_cov': np.diag([0.2, 0.2, 0.2])
 
-Particle Filter run time:  909.4055104255676
-PF error mean:  0.41687274012216025
-Sensor error mean:  0.4953688092718899
+Particle Filter run time:  33.342034101486206
+PF error mean:  0.33454719599013266
+Sensor error mean:  0.49698476442848366
 
 ##
 'Q': np.diag([0.2, 0.2, 0.2]), 
@@ -148,9 +148,9 @@ Sensor error mean:  0.4953688092718899
 'Sample_time': 500,
 'Sample_cov': np.diag([0.2, 0.2, 0.2])
 
-Particle Filter run time:  897.1047010421753
-PF error mean:  0.4663270701651364
-Sensor error mean:  0.7024673937325895
+Particle Filter run time:  33.3983314037323
+PF error mean:  0.43491033966099407
+Sensor error mean:  0.7236618233448888
 
 ##
 'Q': np.diag([0.05, 0.05, 0.05]), 
@@ -158,9 +158,9 @@ Sensor error mean:  0.7024673937325895
 'Sample_time': 500,
 'Sample_cov': np.diag([0.2, 0.2, 0.2])
 
-Particle Filter run time:  884.4435863494873
-PF error mean:  0.39186676310826607
-Sensor error mean:  0.3638615442550329
+Particle Filter run time:  32.88606786727905
+PF error mean:  0.2731871183067775
+Sensor error mean:  0.3596606973773532
 
 the sensor noise affect the accuracy, a larger noise leads to a larger error
 
@@ -171,9 +171,9 @@ change motion noise
 'Sample_time': 500,
 'Sample_cov': np.diag([0.2, 0.2, 0.2])
 
-Particle Filter run time:  909.4055104255676
-PF error mean:  0.41687274012216025
-Sensor error mean:  0.4953688092718899
+Particle Filter run time:  33.342034101486206
+PF error mean:  0.33454719599013266
+Sensor error mean:  0.49698476442848366
 
 ##
 'Q': np.diag([0.1, 0.1, 0.1]), 
@@ -181,9 +181,9 @@ Sensor error mean:  0.4953688092718899
 'Sample_time': 500,
 'Sample_cov': np.diag([0.2, 0.2, 0.2])
 
-Particle Filter run time:  884.0056872367859
-PF error mean:  0.5589520055580139
-Sensor error mean:  0.5047679598578328
+Particle Filter run time:  33.114189863204956
+PF error mean:  0.38551550316059124
+Sensor error mean:  0.5092973651745273
 
 ##
 'Q': np.diag([0.1, 0.1, 0.1]), 
@@ -191,9 +191,9 @@ Sensor error mean:  0.5047679598578328
 'Sample_time': 500,
 'Sample_cov': np.diag([0.2, 0.2, 0.2])
 
-Particle Filter run time:  891.4730653762817
-PF error mean:  0.3287464714016917
-Sensor error mean:  0.5031625798053738
+Particle Filter run time:  33.58634924888611
+PF error mean:  0.3044872180486765
+Sensor error mean:  0.5077157985134202
 
 the motion noise affect the accuracy, a larger noise leads to a larger error
 
