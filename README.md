@@ -2,7 +2,7 @@
 
 This project implemented a Kalman filter and a particle filter to estimate the robot’s position as it executes the path.
 
-1. run ./install.sh
+1. run ./install.sh (Make the script executable by running chmod +x install.sh in the terminal.)
 2. python3 demo.py
 
 ## Result

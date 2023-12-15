@@ -1,0 +1,150 @@
+##################### KF ######################
+
+change sensor noise
+'Q': np.diag([0.05, 0.05, 0.05]), 
+'R': np.diag([0.1, 0.1, 0.1]), 
+
+##
+'Q': np.diag([0.2, 0.2, 0.2]), 
+'R': np.diag([0.1, 0.1, 0.1]), 
+
+##
+'Q': np.diag([0.1, 0.1, 0.1]), 
+'R': np.diag([0.1, 0.1, 0.1]),
+
+
+change motion noise
+'Q': np.diag([0.1, 0.1, 0.1]), 
+'R': np.diag([0.05, 0.05, 0.05]), 
+
+##
+'Q': np.diag([0.1, 0.1, 0.1]), 
+'R': np.diag([0.2, 0.2, 0.2]), 
+
+##
+'Q': np.diag([0.1, 0.1, 0.1]), 
+'R': np.diag([0.1, 0.1, 0.1]), 
+
+
+interesting case: with large noise, the robot may stuck inside the narrow space
+'Q': np.diag([0.5, 0.5, 0.5]), 
+'R': np.diag([0.5, 0.5, 0.5]), 
+
+
+##################### PF ######################
+every 10 times resample once, every 80 times draw the particles
+
+change number of particle
+'Q': np.diag([0.1, 0.1, 0.1]), 
+'R': np.diag([0.1, 0.1, 0.1]), 
+'Sample_time': 100,
+'Sample_cov': np.diag([0.2, 0.2, 0.2])
+
+Particle Filter run time:  259.2349953651428
+PF error mean:  0.5200310315134417
+Sensor error mean:  0.5104157568384022
+
+##
+'Q': np.diag([0.1, 0.1, 0.1]), 
+'R': np.diag([0.1, 0.1, 0.1]), 
+'Sample_time': 500,
+'Sample_cov': np.diag([0.2, 0.2, 0.2])
+
+Particle Filter run time:  909.4055104255676
+PF error mean:  0.41687274012216025
+Sensor error mean:  0.4953688092718899
+
+##
+'Q': np.diag([0.1, 0.1, 0.1]), 
+'R': np.diag([0.1, 0.1, 0.1]), 
+'Sample_time': 1000,
+'Sample_cov': np.diag([0.2, 0.2, 0.2])
+
+Particle Filter run time:  1689.6501863002777
+PF error mean:  0.3945795791073493
+Sensor error mean:  0.5064980606559878
+
+since there's not much difference in error between 1000 and 500 sample time, choose 500 to save computational resource and keep accuracy
+run time should compared without plotting (should be tested later)
+
+change sample covariance
+'Q': np.diag([0.1, 0.1, 0.1]), 
+'R': np.diag([0.1, 0.1, 0.1]), 
+'Sample_time': 500,
+'Sample_cov': np.diag([0.2, 0.2, 0.2])
+
+Particle Filter run time:  909.4055104255676
+PF error mean:  0.41687274012216025
+Sensor error mean:  0.4953688092718899
+
+##
+'Q': np.diag([0.1, 0.1, 0.1]), 
+'R': np.diag([0.1, 0.1, 0.1]), 
+'Sample_time': 500,
+'Sample_cov': np.diag([0.5, 0.5, 0.5])
+
+Particle Filter run time:  888.2086334228516
+PF error mean:  0.4266476591036244
+Sensor error mean:  0.5028238778052536
+
+##
+'Q': np.diag([0.1, 0.1, 0.1]), 
+'R': np.diag([0.1, 0.1, 0.1]), 
+'Sample_time': 500,
+'Sample_cov': np.diag([0.8, 0.8, 0.8])
+
+Particle Filter run time:  896.428560256958
+PF error mean:  0.4149249133864428
+Sensor error mean:  0.4955277618700313
+
+changing sample covariance does not affect the accuracy of the system, it only impact the initial estimation, as you can see in the figures, 
+a larger covariance will lead to a bigger prediction area
+
+
+change sensor noise
+'Q': np.diag([0.1, 0.1, 0.1]), 
+'R': np.diag([0.1, 0.1, 0.1]), 
+'Sample_time': 500,
+'Sample_cov': np.diag([0.2, 0.2, 0.2])
+
+Particle Filter run time:  909.4055104255676
+PF error mean:  0.41687274012216025
+Sensor error mean:  0.4953688092718899
+
+##
+'Q': np.diag([0.2, 0.2, 0.2]), 
+'R': np.diag([0.1, 0.1, 0.1]), 
+'Sample_time': 500,
+'Sample_cov': np.diag([0.2, 0.2, 0.2])
+
+##
+'Q': np.diag([0.05, 0.05, 0.05]), 
+'R': np.diag([0.1, 0.1, 0.1]), 
+'Sample_time': 500,
+'Sample_cov': np.diag([0.2, 0.2, 0.2])
+
+
+change motion noise
+'Q': np.diag([0.1, 0.1, 0.1]), 
+'R': np.diag([0.1, 0.1, 0.1]), 
+'Sample_time': 500,
+'Sample_cov': np.diag([0.2, 0.2, 0.2])
+
+##
+'Q': np.diag([0.1, 0.1, 0.1]), 
+'R': np.diag([0.2, 0.2, 0.2]), 
+'Sample_time': 500,
+'Sample_cov': np.diag([0.2, 0.2, 0.2])
+
+##
+'Q': np.diag([0.1, 0.1, 0.1]), 
+'R': np.diag([0.05, 0.05, 0.05]), 
+'Sample_time': 500,
+'Sample_cov': np.diag([0.2, 0.2, 0.2])
+
+
+interesting case: with large noise, the robot may stuck inside the narrow space
+'Q': np.diag([0.5, 0.5, 0.5]), 
+'R': np.diag([0.5, 0.5, 0.5]), 
+'Sample_time': 500,
+'Sample_cov': np.diag([0.2, 0.2, 0.2])

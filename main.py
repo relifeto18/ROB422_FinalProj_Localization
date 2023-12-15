@@ -2,14 +2,14 @@ import time
 import numpy as np
 import pybullet as p
 import pybullet_data as pd
-from utils import get_collision_fn_PR2, load_env, execute_trajectory, draw_sphere_marker, draw_line
-from pybullet_tools.utils import connect, disconnect, get_joint_positions, wait_if_gui, set_joint_positions, joint_from_name, get_link_pose, link_from_name
+from utils import get_collision_fn_PR2, load_env, execute_trajectory, draw_sphere_marker
+from pybullet_tools.utils import connect, disconnect, get_joint_positions, wait_if_gui, set_joint_positions, joint_from_name
 from pybullet_tools.pr2_utils import PR2_GROUPS
 from path_data import get_motion, get_path, draw_path
-from vis import Plot_KF, plot_cov, Plot_PF
+from vis import Plot_KF, Plot_PF
 from KF import KalmanFilter
 from PF import ParticleFilter
-from models import sensor_model, motion_model
+from models import sensor_model
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse
 
@@ -19,13 +19,13 @@ param = {
     'A': np.eye(3),
     'B': np.eye(3) * 0.1,
     'C': np.eye(3),
-    'Q': np.diag([0.05, 0.05, 0.05]),    # sensor noise
-    'R': np.diag([0.01, 0.01, 0.01]),    # motion noise
-    'Sample_time': 1000,
-    'Sample_cov': np.diag([0.01, 0.01, 0.01])   # covariance of sampling
+    'Q': np.diag([0.2, 0.2, 0.2]),    # sensor noise
+    'R': np.diag([0.1, 0.1, 0.1]),    # motion noise
+    'Sample_time': 500,
+    'Sample_cov': np.diag([0.2, 0.2, 0.2])   # covariance of initial sampling
 }
 
-def main(screenshot=False):
+def main(filter="PF"):
     # initialize PyBullet
     connect(use_gui=True)
     # load robot and obstacle resources
@@ -45,7 +45,10 @@ def main(screenshot=False):
     
     path = get_path()
     draw_path()
-    filter = "PF"
+    draw_KF = False
+    draw_PF = True
+    plot_cov = False
+    
     KF_error = []
     KF_sensor_error = []
     KF_sensor_data = []
@@ -55,34 +58,32 @@ def main(screenshot=False):
     PF_sensor_data = []
     PF_estimation = []
     ground = path[:, :2].copy()
-    draw_KF = False
-    draw_PF = True
-    plot_cov = False
     
-    dt = 0.1
     KF = KalmanFilter(param)
-    Q = KF.Q   # motion noise
-    R = KF.R   # sensor noise
-    motion_input, theta = get_motion()
     PF = ParticleFilter(param)
+    Q = param["Q"]   # sensor noise
+    motion_input, theta = get_motion()
+
 
     ################ Kalman Filter ################
     if filter == "KF":
+        print("Kalman Filter running: expected 10s.")
+        
+        # initialize covariance plot
         if plot_cov:
             plt.ion()
             plot_axes = plt.subplot(111, aspect='equal')  
-            plot_axes.set_xlim([-2.5, 10])  # Adjust these values as needed
+            plot_axes.set_xlim([-2.5, 10])
             plot_axes.set_ylim([-2.5, 10])
         
         start_time = time.time()
         
         for i, motion in enumerate(motion_input):
             motion = motion_input[i]
-            mu = tuple(get_joint_positions(robots['pr2'], base_joints))
-
-            u = np.array([motion[0]*np.cos(theta[i]), motion[0]*np.sin(theta[i]), motion[-1]], dtype=float)
-            z = sensor_model(path[i+1].copy(), Q)
-            mu_new, Sigma_new = KF.KalmanFilter(mu, z, u) 
+            mu = tuple(get_joint_positions(robots['pr2'], base_joints))   # current state
+            u = np.array([motion[0]*np.cos(theta[i]), motion[0]*np.sin(theta[i]), motion[-1]], dtype=float)   # control input
+            z = sensor_model(path[i+1].copy(), Q)   # noisy measurement
+            mu_new, Sigma_new = KF.KalmanFilter(mu, z, u)   # Kalman Filter
             
             KF_error.append(path[i+1] - mu_new)
             KF_sensor_error.append(path[i+1] - z)
@@ -103,20 +104,23 @@ def main(screenshot=False):
                     ell.set_edgecolor('k')
                     plot_axes.add_artist(ell)
                     plt.scatter(x[0,0],x[1,0],c='r',s=5)
+                # adaptive screen
                 plot_axes.set_xlim([min(plot_axes.get_xlim()[0], mu_new[0]-5), max(plot_axes.get_xlim()[1], mu_new[0]+5)])
                 plot_axes.set_ylim([min(plot_axes.get_ylim()[0], mu_new[1]-5), max(plot_axes.get_ylim()[1], mu_new[1]+5)])
                 plt.draw()
                 plt.pause(0.0001)
-                # plot_cov(np.array(mu).reshape(-1,1),Sigma_new, plot_axes)
             
+            # draw sensor and estimation data
             if draw_KF == True:
                 draw_sphere_marker((z[0], z[1], 0.15), 0.08, (0, 0, 1, 1))
                 draw_sphere_marker((mu_new[0], mu_new[1], 0.1), 0.08, (1, 1, 0, 1))
-                
+            
+            # set the robot to estimated state
             set_joint_positions(robots['pr2'], base_joints, mu_new)
 
         print("Kalman Filter run time: ", time.time() - start_time)
         
+        # close the plot
         if plot_cov:
             plt.ioff()
             plt.show()
@@ -128,25 +132,32 @@ def main(screenshot=False):
         estimation = np.vstack(KF_estimation)[:, :2]
         plot_kf = Plot_KF(len(kf_err), kf_err, sensor_err, sensor_data, estimation, ground)
         plot_kf.show_plots()
+
+        wait_if_gui()
+        disconnect()
     
     
     ################ Particle Filter ################
     if filter == "PF":
+        print("Particle Filter running: expected 30s.")
+        
         start_time = time.time()
         
         for i, motion in enumerate(motion_input):
-            u = np.array([float(motion[0]*np.cos(theta[i])), float(motion[0]*np.sin(theta[i])), motion[-1]])
-            z = sensor_model(path[i+1].copy(), Q)
-            pose_estimated = PF.ParticleFilter(u, z, False)
-            
+            u = np.array([float(motion[0]*np.cos(theta[i])), float(motion[0]*np.sin(theta[i])), motion[-1]])   # control input
+            z = sensor_model(path[i+1].copy(), Q)   # noisy measurement
+            pose_estimated = PF.PF_update(u, z, draw=True)   # Partical Filter
+    
             PF_error.append(path[i+1] - pose_estimated)
             PF_sensor_error.append(path[i+1] - z)
             PF_sensor_data.append(z)
             PF_estimation.append(pose_estimated)
-            
+                    
+            # draw sampling and estimation data
             if draw_PF:
-                draw_sphere_marker((pose_estimated[0], pose_estimated[1], 0.1), 0.1, (0, 0, 1, 1))
-            
+                draw_sphere_marker((pose_estimated[0], pose_estimated[1], 0.1), 0.08, (0, 0, 1, 1))
+
+            # set the robot to estimated state
             set_joint_positions(robots['pr2'], base_joints, pose_estimated)
         
         print("Particle Filter run time: ", time.time() - start_time)
@@ -161,15 +172,9 @@ def main(screenshot=False):
         print("PF error mean: ", np.mean(pf_err))
         print("Sensor error mean: ", np.mean(sensor_err))
 
- 
-    # Test Path
-    # for pa in path:
-    #     draw_sphere_marker((pa[0], pa[1], 0.1), 0.1, (1, 1, 0, 1))
-    #     set_joint_positions(robots['pr2'], base_joints, pa)
+        wait_if_gui()
+        disconnect()
 
-    # Keep graphics window opened
-    wait_if_gui()
-    disconnect()
 
 if __name__ == '__main__':
     main()

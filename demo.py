@@ -1,4 +1,5 @@
+import main
 
-print("Kalman Filter: expected 10s to run.")
+main(filter="KF")
 
-print("Particle Filter: expected 30s to run.")
+main(filter="PF")
