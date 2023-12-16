@@ -24,15 +24,14 @@ class ParticleFilter:
         # predict
         for i in range(self.sample_times):
             self.particles[i] = self.A @ self.particles[i] + self.B @ u
-            self.particles[i] += np.random.multivariate_normal([0, 0, 0], self.R)
-        
-        # # Euclidean
-        # weights_sum = 0
-        # for i in range(self.sample_times):
-        #     self.W[i] = 1 / np.sqrt((self.particles[i][0] - z[0])**2 + (self.particles[i][1] - z[1])**2)
-        #     weights_sum += self.W[i]
-        # self.W /= weights_sum   # normalize
-        
+            temp_R = self.R.copy()
+
+            temp_R[0][0] = self.R[0][0] * np.abs(u[0]) + 1e-5
+            temp_R[1][1] = self.R[1][1] * np.abs(u[1]) + 1e-5
+            temp_R[2][2] = self.R[2][2] * np.abs(u[2]) + 1e-5
+            
+            self.particles[i] += np.random.multivariate_normal([0, 0, 0], temp_R)
+
         # update
         weights_sum = 0
         for i in range(self.sample_times):
@@ -61,7 +60,7 @@ class ParticleFilter:
         # draw sampling particals
         if (self.count - 1) % 80 == 0 and draw:
             for particle in self.particles:
-                draw_sphere_marker((particle[0], particle[1], 0.1), 0.05, (0, 1, 0, 1))
+                draw_sphere_marker((particle[0], particle[1], 0.1), 0.08, (0, 1, 0, 1))
         
         
         # estimate

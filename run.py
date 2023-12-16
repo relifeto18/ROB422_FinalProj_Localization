@@ -22,57 +22,33 @@ param = {
     'C': np.eye(3),
     'Q': np.diag([0.1, 0.1, 0.1]),    # sensor noise
     'R': np.diag([0.1, 0.1, 0.1]),    # motion noise
-    'Sample_time': 500,
+    'Sample_time': 100,
     'Sample_cov': np.diag([0.2, 0.2, 0.2])   # covariance of initial sampling
 }
 
-def get_collision_fn(robot_id, joint_indices):
-    """
-    Args:
-        robot_id (int): Unique id of robot
-        joint_indices (array_like): Indices of actuated joints
-    """
-    def collision_fn(config):
-        """
-        Args:
-            config (array_like): Robot config
-        Returns:
-            bool: True if collided, else False
-        """
-        # Set joints to config
-        set_joint_positions(robot_id, joint_indices, config)
-        p.performCollisionDetection()
-        contact_points = p.getContactPoints(robot_id)
-        if len(contact_points) > 0:
-            return True
-        return False
-    return collision_fn
-
 def main(filter="KF"):
     # initialize parameters    
-    draw_KF = False
-    draw_PF = False
-    draw_sample = False
+    draw_KF = True
+    draw_PF = True
+    draw_sample = True
     plot_cov = False
     
     KF_error = []
     KF_sensor_error = []
     KF_sensor_data = []
     KF_estimation = []
-    KF_collision = 0
     PF_error = []
     PF_sensor_error = []
     PF_sensor_data = []
     PF_estimation = []
-    PF_collision = 0
         
     KF = KalmanFilter(param)
     PF = ParticleFilter(param)
     Q = param["Q"]   # sensor noise
     motion_input, theta = get_motion()
     
-    print("Please close all the plots and press enter to continue.")
-    print("Loading Kalman Filter ...")
+    print("\nPlease close all the plots and press enter to continue.")
+    print("Loading Kalman Filter ...\n")
     time.sleep(2)
     
 
@@ -94,18 +70,12 @@ def main(filter="KF"):
         # define active DoFs
         base_joints = [joint_from_name(robots['pr2'], name) for name in PR2_GROUPS['base']]
         
-        # check collision
-        # collision_fn = get_collision_fn_PR2(robots['pr2'], base_joints, list(obstacles.values()))
-        # set_joint_positions(robots['pr2'], base_joints, [2.0, 5.5, -1.57])
-        # config = np.array(get_joint_positions(robots['pr2'], base_joints))
-        # collision_fn = get_collision_fn(robots['pr2'], base_joints)
-        # print(collision_fn(config))
-        
         path = get_path()
         draw_path()
         ground = path[:, :2].copy()
     
-        print("Kalman Filter running: expected less than 10s.")
+        print("\nKalman Filter running: expected 4mins to complete drawing.")
+        print("The sensor measurements: blue dots.\nThe filter estimations: yellow dots.\nThe ground truth: red line.")
         
         # initialize covariance plot
         if plot_cov:
@@ -150,8 +120,8 @@ def main(filter="KF"):
             
             # draw sensor and estimation data
             if draw_KF == True:
-                draw_sphere_marker((z[0], z[1], 0.15), 0.08, (0, 0, 1, 1))
-                draw_sphere_marker((mu_new[0], mu_new[1], 0.1), 0.08, (1, 1, 0, 1))
+                draw_sphere_marker((z[0], z[1], 0.15), 0.08, (0, 0, 1, 1))   # sensor measurement in blue
+                draw_sphere_marker((mu_new[0], mu_new[1], 0.1), 0.08, (1, 1, 0, 1))   # estimation in yellow
             
             # set the robot to estimated state
             set_joint_positions(robots['pr2'], base_joints, mu_new)
@@ -162,7 +132,8 @@ def main(filter="KF"):
         if plot_cov:
             plt.ioff()
             plt.show()
-    
+
+        print("Plot Kalman Filter ...\n")
         # visualize
         kf_err = np.linalg.norm(np.vstack(KF_error.copy()), axis=1)
         kf_sensor_err = np.linalg.norm(np.vstack(KF_sensor_error.copy()), axis=1)
@@ -178,7 +149,7 @@ def main(filter="KF"):
         disconnect()
     
     filter = "PF"
-    print("Loading Particle Filter ...")
+    print("\nLoading Particle Filter ...\n")
     time.sleep(2)
     
     ################ Particle Filter ################
@@ -198,12 +169,12 @@ def main(filter="KF"):
         
         # define active DoFs
         base_joints = [joint_from_name(robots['pr2'], name) for name in PR2_GROUPS['base']]
-        collision_fn = get_collision_fn_PR2(robots['pr2'], base_joints, list(obstacles.values()))
         
         path = get_path()
         draw_path()
         ground = path[:, :2].copy()
-        print("Particle Filter running: expected less than 60s.")
+        print("\nParticle Filter running: expected 4-5mins to complete drawing.")
+        print("The sampling particles: green dots.\nThe filter estimations: blue dots.\nThe ground truth: red line.")
         
         start_time = time.time()
         
@@ -211,7 +182,6 @@ def main(filter="KF"):
             u = np.array([float(motion[0]*np.cos(theta[i])), float(motion[0]*np.sin(theta[i])), motion[-1]])   # control input
             z = sensor_model(path[i+1].copy(), Q)   # noisy measurement
             pose_estimated = PF.PF_update(u, z, draw=draw_sample)   # Partical Filter
-    
             PF_error.append(path[i+1] - pose_estimated)
             PF_sensor_error.append(path[i+1] - z)
             PF_sensor_data.append(z)
@@ -224,8 +194,9 @@ def main(filter="KF"):
             # set the robot to estimated state
             set_joint_positions(robots['pr2'], base_joints, pose_estimated)
         
-        print("Particle Filter run time: ", time.time() - start_time)
+        print("Particle Filter run time: ", time.time() - start_time)           
         
+        print("Plot Particle Filter ...\n")
         # visualize
         pf_err = np.linalg.norm(np.vstack(PF_error.copy()), axis=1)
         pf_sensor_err = np.linalg.norm(np.vstack(PF_sensor_error.copy()), axis=1)
@@ -240,6 +211,7 @@ def main(filter="KF"):
         wait_if_gui()
         disconnect()
     
+    print("\nPlot KF vs PF ...")
     # plot KF vs PF data
     kf_err = np.linalg.norm(np.vstack(KF_error.copy()), axis=1)
     kf_estimation = np.vstack(KF_estimation)[:, :2]
