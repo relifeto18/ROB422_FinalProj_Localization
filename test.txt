@@ -1,0 +1,8 @@
+'Q': np.diag([0.1, 0.1, 0.1]),    # sensor noise
+'R': np.diag([0.1, 0.1, 0.1]),    # motion noise
+'Sample_time': 100,
+'Sample_cov': np.diag([0.2, 0.2, 0.2]) 
+
+KF:
+
+PF:
