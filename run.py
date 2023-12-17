@@ -20,18 +20,18 @@ param = {
     'A': np.eye(3),
     'B': np.eye(3) * 0.1,
     'C': np.eye(3),
-    'Q': np.diag([0.1, 0.05, 0.1]),    # sensor noise
-    'R': np.diag([0.1, 0.05, 0.1]),    # motion noise
+    'Q': np.diag([0.05, 0.05, 0.05]),    # sensor noise
+    'R': np.diag([0.05, 0.05, 0.05]),    # motion noise
     'Sample_time': 100,
     'Sample_cov': np.diag([0.2, 0.2, 0.2])   # covariance of initial sampling
 }
 
 def main(filter="KF"):
     # initialize parameters    
-    draw_KF = True
-    draw_PF = True
-    draw_sample = True
-    plot_cov = True
+    draw_KF = False
+    draw_PF = False
+    draw_sample = False
+    plot_cov = False
     
     KF_error = []
     KF_sensor_error = []
@@ -74,7 +74,6 @@ def main(filter="KF"):
         path = get_path()
         draw_path()
         ground = path[:, :2].copy()
-        time.sleep(8)
     
         print("\nKalman Filter running: expected 4mins to complete drawing.")
         print("The sensor measurements: blue dots.\nThe filter estimations: yellow dots.\nThe ground truth: red line.")
@@ -175,7 +174,6 @@ def main(filter="KF"):
         path = get_path()
         draw_path()
         ground = path[:, :2].copy()
-        time.sleep(8)
         
         print("\nParticle Filter running: expected 4-5mins to complete drawing.")
         print("The sampling particles: green dots.\nThe filter estimations: blue dots.\nThe ground truth: red line.")
