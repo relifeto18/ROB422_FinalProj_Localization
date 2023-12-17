@@ -17,21 +17,23 @@ In the video, the red line is the ground truth, the yellow dots are estimations 
 
 In the picture, the green line is the ground truth, the red dots are estimations from the Kalman Filter and the blue dots are noisy sensor measurements.
 
-![](https://github.com/relifeto18/ROB422_FinalProj_Localization/blob/master/figs/KF/Kalman%20Filter.gif)
-![](https://github.com/relifeto18/ROB422_FinalProj_Localization/blob/master/figs/KF/Kalman%20Filter%20Map.png)
+![](https://github.com/relifeto18/ROB422_FinalProj_Localization/blob/master/output/KF.gif)
+![](https://github.com/relifeto18/ROB422_FinalProj_Localization/blob/master/output/KF_map.png)
 
 ### Particle Filter
 
 Below are the output results for the Particle Filter. 
 
-In the video, the red line is the ground truth, the yellow dots are estimations from the Particle Filter and the blue dots are noisy sensor measurements.
+In the video, the red line is the ground truth, the blue dots are estimations from the Particle Filter and the green dots are sampling particles.
 
-In the picture, the green line is the ground truth, the red dots are estimations from the Particle Filter and the blue dots are noisy sensor measurements.
+![](https://github.com/relifeto18/ROB422_FinalProj_Localization/blob/master/output/PF.gif)
 
-![](https://github.com/relifeto18/ROB422_FinalProj_Localization/blob/master/figs/PF/Particle%20Filter%20Map.png)
+In the picture, the black line is the ground truth, the blue dots are estimations from the Particle Filter, the green dots are noisy sensor measurements and the red dots are sampling particles.
+
+![](https://github.com/relifeto18/ROB422_FinalProj_Localization/blob/master/output/PF_map.png)
 
 ### Kalman Filter vs Particle Filter
 
-Below shows the Kalman Filter and Particle Filter under the same scenario. The green line is the ground truth, the blue dots are estimations from the Particle Filter and the red dots are estimations from the Particle Filter.
+Below compares the Kalman Filter and Particle Filter under the same scenario. The green line is the ground truth, the blue dots are estimations from the Kalman Filter and the red dots are estimations from the Particle Filter.
 
-![](https://github.com/relifeto18/ROB422_FinalProj_Localization/blob/master/figs/KF%20vs%20PF/KF_vs_PF_est.png)
+![](https://github.com/relifeto18/ROB422_FinalProj_Localization/blob/master/output/KF%20vs%20PF.png)
