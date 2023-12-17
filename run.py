@@ -20,8 +20,8 @@ param = {
     'A': np.eye(3),
     'B': np.eye(3) * 0.1,
     'C': np.eye(3),
-    'Q': np.diag([0.1, 0.1, 0.1]),    # sensor noise
-    'R': np.diag([0.1, 0.1, 0.1]),    # motion noise
+    'Q': np.diag([0.05, 0.05, 0.05]),    # sensor noise
+    'R': np.diag([0.05, 0.05, 0.05]),    # motion noise
     'Sample_time': 100,
     'Sample_cov': np.diag([0.2, 0.2, 0.2])   # covariance of initial sampling
 }
@@ -41,6 +41,7 @@ def main(filter="KF"):
     PF_sensor_error = []
     PF_sensor_data = []
     PF_estimation = []
+    particles = []
         
     KF = KalmanFilter(param)
     PF = ParticleFilter(param)
@@ -173,6 +174,7 @@ def main(filter="KF"):
         path = get_path()
         draw_path()
         ground = path[:, :2].copy()
+        
         print("\nParticle Filter running: expected 4-5mins to complete drawing.")
         print("The sampling particles: green dots.\nThe filter estimations: blue dots.\nThe ground truth: red line.")
         
@@ -181,7 +183,7 @@ def main(filter="KF"):
         for i, motion in enumerate(motion_input):
             u = np.array([float(motion[0]*np.cos(theta[i])), float(motion[0]*np.sin(theta[i])), motion[-1]])   # control input
             z = sensor_model(path[i+1].copy(), Q)   # noisy measurement
-            pose_estimated = PF.PF_update(u, z, draw=draw_sample)   # Partical Filter
+            pose_estimated, particles = PF.PF_update(u, z, draw=draw_sample)   # Partical Filter
             PF_error.append(path[i+1] - pose_estimated)
             PF_sensor_error.append(path[i+1] - z)
             PF_sensor_data.append(z)
@@ -194,7 +196,7 @@ def main(filter="KF"):
             # set the robot to estimated state
             set_joint_positions(robots['pr2'], base_joints, pose_estimated)
         
-        print("Particle Filter run time: ", time.time() - start_time)           
+        print("Particle Filter run time: ", time.time() - start_time) 
         
         print("Plot Particle Filter ...\n")
         # visualize
@@ -202,7 +204,8 @@ def main(filter="KF"):
         pf_sensor_err = np.linalg.norm(np.vstack(PF_sensor_error.copy()), axis=1)
         pf_sensor_data = np.vstack(PF_sensor_data)[:, :2]
         pf_estimation = np.vstack(PF_estimation)[:, :2]
-        plot_pf = Plot_PF(len(pf_err), pf_err, pf_sensor_err, pf_sensor_data, pf_estimation, ground)
+        pf_particles = np.vstack(particles)[:, :2]
+        plot_pf = Plot_PF(len(pf_err), pf_err, pf_sensor_err, pf_sensor_data, pf_estimation, pf_particles, ground)
         plot_pf.show_plots()
         
         # print("PF error mean: ", np.mean(pf_err))

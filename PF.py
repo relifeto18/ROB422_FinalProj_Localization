@@ -17,6 +17,7 @@ class ParticleFilter:
         self.particles = np.random.multivariate_normal(self.init_state, self.init_cov, self.sample_times)
         self.W = np.ones(self.sample_times) / self.sample_times
         self.count = 0
+        self.particles_list = []
 
     def PF_update(self, u, z, draw=False):
         self.count += 1
@@ -57,11 +58,13 @@ class ParticleFilter:
         self.particles = X_resampled
         self.W = np.ones(N) / N
         
-        # draw sampling particals
-        if (self.count - 1) % 80 == 0 and draw:
-            for particle in self.particles:
-                draw_sphere_marker((particle[0], particle[1], 0.1), 0.08, (0, 1, 0, 1))
-        
+        # draw sampling particles
+        if (self.count - 1) % 80 == 0:
+            self.particles_list.append(self.particles)
+            
+            if draw:
+                for particle in self.particles:
+                    draw_sphere_marker((particle[0], particle[1], 0.1), 0.1, (0, 1, 0, 1))
         
         # estimate
-        return np.average(self.particles, weights=self.W, axis=0)
+        return np.average(self.particles, weights=self.W, axis=0), self.particles_list
